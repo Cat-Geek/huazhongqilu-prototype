@@ -512,7 +512,8 @@ button{font-family:inherit;}
         <div class="menu-children" id="grp-res">
           <ul>
             <li class="menu-item__child" data-page="resource-list" tabindex="0">资源台账</li>
-            <li class="menu-item__child" data-page="meta-type" tabindex="0">资源类型与属性</li>
+            <li class="menu-item__child" data-page="meta-type" tabindex="0">资源类型</li>
+            <li class="menu-item__child" data-page="meta-attr" tabindex="0">资源属性</li>
           </ul>
         </div>
       </li>
@@ -537,6 +538,14 @@ button{font-family:inherit;}
           <span class="left">
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             <span class="label">标签查询</span>
+          </span>
+        </div>
+      </li>
+      <li class="menu-group">
+        <div class="menu-item__parent" data-page="ai-assistant" role="menuitem" tabindex="0">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 14.2 9 20.5 11.2 14.2 13.4 12 19.9 9.8 13.4 3.5 11.2 9.8 9 12 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M18.5 16.5 19.4 19 22 19.9 19.4 20.8 18.5 23.3 17.6 20.8 15 19.9 17.6 19 18.5 16.5Z" fill="currentColor" opacity=".55"/></svg>
+            <span class="label">AI 助手</span>
           </span>
         </div>
       </li>
@@ -603,6 +612,28 @@ button{font-family:inherit;}
             <div id="dashTopTags"></div>
           </div>
         </div>
+        <div class="block" style="border:1px solid #BBD4EE;background:linear-gradient(135deg,#F7FBFF 0%,#ECF3FA 100%);">
+          <div class="block__title" style="margin-bottom:10px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 14.2 9 20.5 11.2 14.2 13.4 12 19.9 9.8 13.4 3.5 11.2 9.8 9 12 2.5Z" fill="var(--primary)"/></svg>
+            AI 能力 <span class="ai-badge" id="dashAiBadge">服务可用</span>
+            <span class="sub" id="dashAiMeta"></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:center;">
+            <div style="font-size:13px;line-height:1.8;">
+              <b>自然语言转规则</b>（API 8.1）<br>
+              <span style="color:var(--text-caption);font-size:12px;">"仓库类型是冷链且面积≥5000" → 条件树，须过结构化校验才可落地</span>
+            </div>
+            <div style="font-size:13px;line-height:1.8;">
+              <b>自然语言推荐标签</b>（API 8.2）<br>
+              <span style="color:var(--text-caption);font-size:12px;">"想找战略价值为A级的资源" → 候选标签排序 + 推荐理由</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn btn-primary btn-sm" data-act="aiGotoRule">✦ 去转规则</button>
+              <button class="btn btn-primary is-plain btn-sm" data-act="aiGotoRec">✦ 去推荐标签</button>
+              <button class="btn btn-default btn-sm" data-act="aiGoto">AI 助手主页</button>
+            </div>
+          </div>
+        </div>
         <div class="block">
           <div class="block__title">最近操作 <span class="sub">审计留痕样例</span></div>
           <div class="table-scroll"><table class="data-table" style="min-width:720px;">
@@ -620,13 +651,14 @@ button{font-family:inherit;}
       <section class="page" id="page-resource-list" hidden>
         <div class="filter-bar">
           <div class="filter-bar__conditions">
-            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:160px;" placeholder="资源名称 / 编码" id="resKw"></span>
+            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:150px;" placeholder="资源名称 / 编码" id="resKw"></span>
             <span class="cond"><label>资源类型</label>
               <select class="select select-sm" id="resType"><option value="">全部</option><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></span>
             <span class="cond"><label>运营状态</label>
-              <select class="select select-sm"><option value="">全部</option><option>运营中</option><option>建设中</option><option>停用</option></select></span>
+              <select class="select select-sm" id="resStatus"><option value="">全部</option><option>运营中</option><option>建设中</option><option>停用</option></select></span>
             <span class="cond"><label>所属区域</label>
-              <select class="select select-sm"><option value="">全部</option><option>湖北</option><option>湖南</option><option>河南</option></select></span>
+              <select class="select select-sm" id="resRegion"><option value="">全部</option><option>湖北</option><option>湖南</option><option>河南</option></select></span>
+            <span class="cond" style="font-size:12px;color:var(--text-caption);" id="resFilterHint"></span>
           </div>
           <div class="filter-bar__actions">
             <button class="btn btn-primary btn-sm" data-act="resSearch">查询</button>
@@ -651,34 +683,54 @@ button{font-family:inherit;}
         </div>
       </section>
 
-      <!-- ===== 页面：资源类型与属性 ===== -->
+      <!-- ===== 页面：资源类型 ===== -->
       <section class="page" id="page-meta-type" hidden>
         <div class="block">
           <div class="block__title">资源类型 <span class="sub">元数据驱动：字段集合以数据形式维护，新增属性零 DDL</span>
             <button class="btn btn-primary btn-sm" style="margin-left:auto;" data-act="typeNew">＋ 新建资源类型</button></div>
-          <div class="table-scroll"><table class="data-table" style="min-width:720px;">
+          <div class="table-scroll"><table class="data-table" style="min-width:760px;">
             <thead><tr><th class="data-table__cell">类型编码</th><th class="data-table__cell">类型名称</th><th class="data-table__cell">属性数</th><th class="data-table__cell">资源数</th><th class="data-table__cell">状态</th><th class="data-table__cell">操作</th></tr></thead>
-            <tbody>
-              <tr><td class="data-table__cell">WAREHOUSE</td><td class="data-table__cell"><span class="data-table__content">仓库</span></td><td class="data-table__cell">9</td><td class="data-table__cell">96</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
-              <tr><td class="data-table__cell">YARD</td><td class="data-table__cell"><span class="data-table__content">场站</span></td><td class="data-table__cell">7</td><td class="data-table__cell">64</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
-              <tr><td class="data-table__cell">WHARF</td><td class="data-table__cell"><span class="data-table__content">码头</span></td><td class="data-table__cell">6</td><td class="data-table__cell">33</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
-              <tr><td class="data-table__cell">VESSEL</td><td class="data-table__cell"><span class="data-table__content">船舶</span></td><td class="data-table__cell">6</td><td class="data-table__cell">25</td><td class="data-table__cell"><span class="status-tag status-tag--gray">停用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
-            </tbody>
+            <tbody id="typeTbody"></tbody>
           </table></div>
+          <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">
+            资源类型的字段集合决定该类型资源拥有哪些属性；「属性数」与属性页同源，点上表「管理属性」可直接跳到该类型的属性清单。
+          </p>
+        </div>
+      </section>
+
+      <!-- ===== 页面：资源属性 ===== -->
+      <section class="page" id="page-meta-attr" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>资源类型</label>
+              <select class="select select-sm" id="attrTypeSel" style="min-width:150px;"></select></span>
+            <span class="cond"><label>存储方式</label>
+              <select class="select select-sm" id="attrStoreSel">
+                <option value="">全部</option><option value="FIXED">固定列</option><option value="EXT">扩展 JSON</option>
+              </select></span>
+            <span class="cond"><label>数据类型</label>
+              <select class="select select-sm" id="attrKindSel">
+                <option value="">全部</option><option>枚举</option><option>数值</option><option>文本</option><option>日期</option><option>布尔</option>
+              </select></span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="attrNew">＋ 新增属性</button>
+          </div>
         </div>
         <div class="block">
-          <div class="block__title">「仓库」类型的属性清单 <span class="sub">前两个为固定物理列，其余走 JSON 扩展字段</span>
-            <button class="btn btn-primary btn-sm" style="margin-left:auto;" data-act="attrNew">＋ 新增属性</button></div>
-          <div class="table-scroll"><table class="data-table" style="min-width:820px;">
-            <thead><tr><th class="data-table__cell">属性编码</th><th class="data-table__cell">属性名称</th><th class="data-table__cell">数据类型</th><th class="data-table__cell">可选值</th><th class="data-table__cell">单位</th><th class="data-table__cell">存储方式</th><th class="data-table__cell">必填</th><th class="data-table__cell">操作</th></tr></thead>
-            <tbody>
-              <tr><td class="data-table__cell">ownership</td><td class="data-table__cell"><span class="data-table__content">权属</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">自有 / 租赁 / 合作</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag">固定列</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button></td></tr>
-              <tr><td class="data-table__cell">operation_status</td><td class="data-table__cell"><span class="data-table__content">运营状态</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">运营中 / 建设中 / 停用</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag">固定列</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button></td></tr>
-              <tr><td class="data-table__cell">warehouse_type</td><td class="data-table__cell"><span class="data-table__content">仓库类型</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">普货 / 冷链 / 危化品 / 保税 / 智能</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
-              <tr><td class="data-table__cell">area</td><td class="data-table__cell"><span class="data-table__content">面积</span></td><td class="data-table__cell">数值</td><td class="data-table__cell">—</td><td class="data-table__cell">㎡</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
-              <tr><td class="data-table__cell">capacity</td><td class="data-table__cell"><span class="data-table__content">容量</span></td><td class="data-table__cell">数值</td><td class="data-table__cell">—</td><td class="data-table__cell">TEU</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">否</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
-            </tbody>
+          <div class="block__title" id="attrTitle">属性清单</div>
+          <div class="table-scroll"><table class="data-table" style="min-width:900px;">
+            <thead><tr>
+              <th class="data-table__cell">属性编码</th><th class="data-table__cell">属性名称</th><th class="data-table__cell">数据类型</th>
+              <th class="data-table__cell">可选值</th><th class="data-table__cell">单位</th><th class="data-table__cell">存储方式</th>
+              <th class="data-table__cell">必填</th><th class="data-table__cell">被规则引用</th><th class="data-table__cell">操作</th>
+            </tr></thead>
+            <tbody id="attrTbody"></tbody>
           </table></div>
+          <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">
+            存储方式：<b>固定列</b> = `resource` 表物理列（仅 `ownership`/`operation_status`，ADR-0014 收窄后的固定集）；<b>扩展 JSON</b> = 存入 `ext_json`，新增属性<b>零 DDL</b>。
+            高频且需下推 SQL 的扩展属性可升级为<b>表达式索引</b>。属性被规则引用时删除会被拒绝（须先改规则）。
+          </p>
         </div>
       </section>
 
@@ -686,13 +738,14 @@ button{font-family:inherit;}
       <section class="page" id="page-tag-list" hidden>
         <div class="filter-bar">
           <div class="filter-bar__conditions">
-            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:160px;" placeholder="标签名称"></span>
+            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:150px;" placeholder="标签名称" id="tagKw"></span>
             <span class="cond"><label>标签类型</label>
-              <select class="select select-sm"><option value="">全部</option><option>分类标签</option><option>分级标签</option></select></span>
+              <select class="select select-sm" id="tagTypeFilter"><option value="">全部</option><option>分类标签</option><option>分级标签</option></select></span>
             <span class="cond"><label>状态</label>
-              <select class="select select-sm"><option value="">全部</option><option>草稿</option><option>生效中</option><option>已失效</option><option>已停用</option></select></span>
+              <select class="select select-sm" id="tagStatusFilter"><option value="">全部</option><option>草稿</option><option>生效中</option><option>已失效</option><option>已停用</option></select></span>
             <span class="cond"><label>作用范围</label>
-              <select class="select select-sm"><option value="">全部</option><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></span>
+              <select class="select select-sm" id="tagScopeFilter"><option value="">全部</option><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></span>
+            <span class="cond" style="font-size:12px;color:var(--text-caption);" id="tagFilterHint"></span>
           </div>
           <div class="filter-bar__actions">
             <button class="btn btn-primary btn-sm" data-act="tagSearch">查询</button>
@@ -774,8 +827,10 @@ button{font-family:inherit;}
         <div class="filter-bar">
           <div class="filter-bar__conditions">
             <span class="cond"><label>触发方式</label>
-              <select class="select select-sm"><option value="">全部</option><option>发布触发</option><option>手动全量</option><option>规则变更</option><option>定时扫描</option></select></span>
-            <span class="cond"><label>时间</label><input class="input input-sm" type="date" value="2026-10-15" style="width:140px;"></span>
+              <select class="select select-sm" id="matchTriggerFilter"><option value="">全部</option><option>发布触发</option><option>手动全量</option><option>规则变更</option><option>定时扫描</option></select></span>
+            <span class="cond"><label>状态</label>
+              <select class="select select-sm" id="matchStatusFilter"><option value="">全部</option><option>成功</option><option>失败</option></select></span>
+            <span class="cond" style="font-size:12px;color:var(--text-caption);" id="matchFilterHint"></span>
           </div>
           <div class="filter-bar__actions">
             <button class="btn btn-primary btn-sm" data-act="matchRun">▶ 触发全量匹配</button>
@@ -919,16 +974,95 @@ button{font-family:inherit;}
         </div>
       </section>
 
+      <!-- ===== 页面：AI 助手 ===== -->
+      <section class="page" id="page-ai-assistant" hidden>
+        <div class="block">
+          <div class="block__title">AI 能力状态 <span class="sub">GET /api/ai/status · 可用性由服务端探测，前端只展示不推断</span>
+            <button class="btn btn-primary is-plain btn-sm" style="margin-left:auto;" data-act="aiStatus">重新检测</button></div>
+          <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+            <div class="stat-card" style="box-shadow:none;border:1px solid var(--border-light);">
+              <span class="stat-card__label">当前状态</span>
+              <span id="aiAstBadge" class="status-tag status-tag--success" style="height:26px;width:fit-content;">服务可用</span>
+              <span class="stat-card__delta" id="aiAstDegraded">—</span>
+            </div>
+            <div class="stat-card" style="box-shadow:none;border:1px solid var(--border-light);">
+              <span class="stat-card__label">主路径</span>
+              <span class="stat-card__value" style="font-size:16px;" id="aiAstMode">LLM</span>
+              <span class="stat-card__delta" id="aiAstModel">—</span>
+            </div>
+            <div class="stat-card" style="box-shadow:none;border:1px solid var(--border-light);">
+              <span class="stat-card__label">降级路径</span>
+              <span class="stat-card__value" style="font-size:16px;" id="aiAstFallback">规则解析器</span>
+              <span class="stat-card__delta">属性别名表 + 单位表 + 比较词映射</span>
+            </div>
+            <div class="stat-card" style="box-shadow:none;border:1px solid var(--border-light);">
+              <span class="stat-card__label">上次检测</span>
+              <span class="stat-card__value" style="font-size:15px;" id="aiAstCheckAt">—</span>
+              <span class="stat-card__delta">每用户每分钟 ≤10 次 · 每次调用记审计</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <label class="check-chip" id="aiAstSimulate"><input type="checkbox" style="margin:0;"> 模拟模型不可用（演示降级）</label>
+            <span style="font-size:12px;color:var(--text-caption);">降级不中断能力：模型不可用时自动切到规则解析器，覆盖面变窄但功能可用（ADR-0007）</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-caption);margin-top:10px;line-height:1.7;">
+            安全口径（ADR-0009）：模型端点只来自服务端配置，<b>请求体不接受任何端点参数</b>；提示词只含"属性名 + 枚举候选值 + 用户原句"，<b>不含资源明细</b>；模型密钥只来自环境变量、不进仓库。
+          </p>
+        </div>
+
+        <div class="block">
+          <div class="block__title">自然语言转规则 <span class="sub">API 8.1 · POST /api/ai/rule-draft · 产出为草案，须经 RuleValidator 校验</span></div>
+          <textarea class="input ai-textarea" id="aiAstText" placeholder="例：把仓库类型是冷链、面积 5000 平米以上的仓库找出来">仓库类型是冷链并且面积不小于5000平米，或者权属是自有</textarea>
+          <div class="ai-chip-row">
+            <span class="ai-chip" data-aichip="面积大于等于5000平方米的仓库">示例：面积门槛</span>
+            <span class="ai-chip" data-aichip="权属是自有或者合作的码头">示例：多值属于</span>
+            <span class="ai-chip" data-aichip="吞吐能力超过100万吨的码头">示例：未定义属性（触发校验拒绝+降级）</span>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" data-act="aiAstDraft">生成规则草案</button>
+            <button class="btn btn-primary is-plain btn-sm" data-act="aiGotoRule">去规则编辑器应用</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block__title">自然语言推荐标签 <span class="sub">API 8.2 · POST /api/ai/tag-recommend · 候选集合本地预筛，模型只做排序与理由</span></div>
+          <textarea class="input ai-textarea" id="aiAstRecText" placeholder="例：想找战略价值为A级的资源">想找战略价值为A级的资源</textarea>
+          <div class="ai-chip-row">
+            <span class="ai-chip" data-aichiprec="想找战略价值为A级的资源">示例：分级价值</span>
+            <span class="ai-chip" data-aichiprec="有没有冷链相关的仓库标签">示例：功能属性</span>
+            <span class="ai-chip" data-aichiprec="面积很大的大型仓库">示例：规模条件</span>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-primary btn-sm" data-act="aiAstRec">推荐标签</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block__title">最近的 AI 调用 <span class="sub">每次调用记审计（S6）：谁、何时、原句摘要、解析来源、是否通过校验</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:820px;">
+            <thead><tr><th class="data-table__cell">时间</th><th class="data-table__cell">操作人</th><th class="data-table__cell">能力</th><th class="data-table__cell">原句摘要</th><th class="data-table__cell">解析来源</th><th class="data-table__cell">校验</th><th class="data-table__cell">耗时</th></tr></thead>
+            <tbody>
+              <tr><td class="data-table__cell">10-15 09:41</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">转规则</span></td><td class="data-table__cell"><span class="data-table__content">仓库类型是冷链并且面积不小于5000…</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">LLM</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">通过</span></td><td class="data-table__cell">1840ms</td></tr>
+              <tr><td class="data-table__cell">10-15 09:38</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">推荐标签</span></td><td class="data-table__cell"><span class="data-table__content">想找战略价值为A级的资源</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">LLM</span></td><td class="data-table__cell"><span class="status-tag status-tag--gray">—</span></td><td class="data-table__cell">920ms</td></tr>
+              <tr><td class="data-table__cell">10-15 09:33</td><td class="data-table__cell"><span class="data-table__content">李媛</span></td><td class="data-table__cell"><span class="data-table__content">转规则</span></td><td class="data-table__cell"><span class="data-table__content">吞吐能力超过100万吨的码头</span></td><td class="data-table__cell"><span class="status-tag status-tag--warning">FALLBACK</span></td><td class="data-table__cell"><span class="status-tag status-tag--danger">未通过</span></td><td class="data-table__cell">260ms</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </section>
+
       <!-- ===== 页面：操作审计 ===== -->
       <section class="page" id="page-audit-log" hidden>
         <div class="filter-bar">
           <div class="filter-bar__conditions">
-            <span class="cond"><label>操作人</label><input class="input input-sm" style="width:120px;" placeholder="姓名"></span>
+            <span class="cond"><label>操作人</label><input class="input input-sm" style="width:110px;" placeholder="姓名" id="auditUserFilter"></span>
             <span class="cond"><label>动作</label>
-              <select class="select select-sm"><option value="">全部</option><option>发布标签</option><option>修改规则</option><option>批量匹配</option><option>删除资源</option></select></span>
-            <span class="cond"><label>日期</label><input class="input input-sm" type="date" style="width:140px;"></span>
+              <select class="select select-sm" id="auditActionFilter"><option value="">全部</option><option>发布标签</option><option>修改规则</option><option>导入资源</option><option>删除资源</option><option>停用标签</option><option>移动组织节点</option></select></span>
+            <span class="cond"><label>结果</label>
+              <select class="select select-sm" id="auditResultFilter"><option value="">全部</option><option>成功</option><option>已生效未重算</option></select></span>
+            <span class="cond" style="font-size:12px;color:var(--text-caption);" id="auditFilterHint"></span>
           </div>
-          <div class="filter-bar__actions"><button class="btn btn-primary btn-sm">查询</button></div>
+          <div class="filter-bar__actions"><button class="btn btn-primary btn-sm" data-act="auditSearch">查询</button>
+            <button class="btn btn-default btn-sm" data-act="auditReset">重置</button></div>
         </div>
         <div class="block">
           <div class="block__title">操作日志 <span class="sub">发布标签 / 规则变更 / 批量匹配三个高影响动作强制留痕（S6）</span></div>
@@ -1095,7 +1229,7 @@ $("#userBtn").onclick=e=>{e.stopPropagation();const m=$("#userMenu");m.hidden=!m
 document.addEventListener("click",e=>{if(!$("#userMenu").hidden&&!$("#userMenu").contains(e.target)&&e.target!==$("#userBtn")){$("#userMenu").hidden=true;}});
 
 /* 页签 */
-const PAGE_TITLES={dashboard:"工作台","resource-list":"资源台账","meta-type":"资源类型与属性","tag-list":"标签管理","rule-config":"打标规则配置","match-task":"自动匹配任务","query-center":"标签查询","org-tree":"组织架构","role-permission":"角色权限","user-list":"用户管理","audit-log":"操作审计"};
+const PAGE_TITLES={dashboard:"工作台","resource-list":"资源台账","meta-type":"资源类型","meta-attr":"资源属性","tag-list":"标签管理","rule-config":"打标规则配置","match-task":"自动匹配任务","query-center":"标签查询","ai-assistant":"AI 助手","org-tree":"组织架构","role-permission":"角色权限","user-list":"用户管理","audit-log":"操作审计"};
 const tabs=[{id:"dashboard"}];let curTab="dashboard";
 function renderTabs(){
   const box=$("#tabsInner");box.innerHTML="";
@@ -1115,8 +1249,12 @@ function switchTab(id){
   $$(".menu-item__child").forEach(c=>c.classList.toggle("is-selected",c.dataset.page===id));
   $$(".menu-item__parent").forEach(p=>p.classList.toggle("is-active",p.dataset.page===id||(p.classList.contains("has-children")&&$$('#grp-'+p.dataset.group+" .menu-item__child.is-selected").length>0)));
   if(id==="dashboard")renderDashTags();
-  if(id==="rule-config")renderAiStatus();
+  if(id==="rule-config"||id==="ai-assistant")renderAiStatus();
   if(id==="org-tree"){renderOrgTree();renderOrgDetail();}
+  if(id==="meta-type")renderTypes();
+  if(id==="meta-attr")renderAttrs();
+  if(id==="match-task")applyMatchFilter();
+  if(id==="audit-log")applyAuditFilter();
   if(id==="role-permission"){renderRoles();renderPermMatrix();}
   if(id==="user-list")renderUsers();
   applyPermissionUI();
@@ -1155,7 +1293,8 @@ function renderResources(list){
     tb.innerHTML=`<tr><td class="data-table__cell" colspan="10"><div class="empty-state">
       <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <p>没有符合条件的资源——试试放宽筛选条件，或新建资源</p>
-      <button class="btn btn-primary is-plain btn-sm" onclick="switchTab('meta-type')">去配置资源类型</button></div></td></tr>`;
+      <button class="btn btn-primary is-plain btn-sm" data-act="resFilterReset">清空筛选条件</button>
+      <button class="btn btn-primary btn-sm" data-act="resNew">＋ 新建资源</button></div></td></tr>`;
     return;
   }
   tb.innerHTML=list.map(r=>`<tr>
@@ -1199,9 +1338,15 @@ function resourceDetail(r){
 }
 
 /* ================= 标签管理 ================= */
-function renderTags(){
+function renderTags(list){
   const tb=$("#tagTbody");
-  tb.innerHTML=TAGS.map(t=>{
+  const data=list||filterTags();
+  if(!data.length){
+    tb.innerHTML=`<tr><td class="data-table__cell" colspan="9">${emptyState("没有符合条件的标签——试试放宽「标签类型 / 状态 / 作用范围」筛选，或新建标签",
+      '<button class="btn btn-primary is-plain btn-sm" data-act="tagFilterReset">清空筛选条件</button>')}</td></tr>`;
+    refreshTagHint(data);return;
+  }
+  tb.innerHTML=data.map(t=>{
     const [txt,cls]=STATUS_MAP[t.status];
     const canPub=t.status==="DRAFT",canDis=t.status==="EFFECTIVE";
     const dirty=t.dirty?'<span class="status-tag status-tag--warning" style="height:20px;margin-left:6px;" title="规则已改，关联结果尚未更新">待重算</span>':"";
@@ -1221,6 +1366,8 @@ function renderTags(){
         ${canDis?`<button class="link-btn danger" data-tag="${t.id}" data-act="tagDisable">停用</button>`:`<button class="link-btn danger" disabled>停用</button>`}
       </td></tr>`;
   }).join("");
+  refreshTagHint(data);
+  applyPermissionUI();
 }
 function tagFormModal(t){
   const isNew=!t;
@@ -2046,6 +2193,159 @@ function applyPermissionUI(){
 }
 
 
+/* ================= 资源类型与资源属性（元数据驱动，Spec §3.2） ================= */
+const RES_TYPES=[
+  {code:"WAREHOUSE",name:"仓库",status:"ENABLED",resCount:96,attrs:[
+    {code:"ownership",name:"权属",kind:"枚举",opts:"自有 / 租赁 / 合作",unit:"—",store:"FIXED",required:true,usedBy:["冷链仓","A级-战略级仓"]},
+    {code:"operation_status",name:"运营状态",kind:"枚举",opts:"运营中 / 建设中 / 停用",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"warehouse_type",name:"仓库类型",kind:"枚举",opts:"普货 / 冷链 / 危化品 / 保税 / 智能",unit:"—",store:"EXT",required:true,usedBy:["冷链仓","保税仓","危化品资质场站"]},
+    {code:"area",name:"面积",kind:"数值",opts:"—",unit:"㎡",store:"EXT",required:true,usedBy:["冷链仓","A级-战略级仓","B级-重要级仓"]},
+    {code:"capacity",name:"容量",kind:"数值",opts:"—",unit:"TEU",store:"EXT",required:false,usedBy:[]},
+    {code:"open_date",name:"投用日期",kind:"日期",opts:"—",unit:"—",store:"EXT",required:false,usedBy:[]},
+    {code:"temperature_zone",name:"温区",kind:"枚举",opts:"冷藏 / 冷冻 / 恒温",unit:"—",store:"EXT",required:false,usedBy:[]},
+    {code:"dock_count",name:"月台数",kind:"数值",opts:"—",unit:"个",store:"EXT",required:false,usedBy:[]},
+    {code:"fire_level",name:"消防等级",kind:"枚举",opts:"甲类 / 乙类 / 丙类",unit:"—",store:"EXT",required:true,usedBy:[]}
+  ]},
+  {code:"YARD",name:"场站",status:"ENABLED",resCount:64,attrs:[
+    {code:"ownership",name:"权属",kind:"枚举",opts:"自有 / 租赁 / 合作",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"operation_status",name:"运营状态",kind:"枚举",opts:"运营中 / 建设中 / 停用",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"yard_type",name:"场站类型",kind:"枚举",opts:"集装箱堆场 / 散货堆场 / 危险品堆场",unit:"—",store:"EXT",required:true,usedBy:["集装箱堆场"]},
+    {code:"area",name:"面积",kind:"数值",opts:"—",unit:"㎡",store:"EXT",required:true,usedBy:[]},
+    {code:"capacity",name:"堆存能力",kind:"数值",opts:"—",unit:"TEU",store:"EXT",required:false,usedBy:[]},
+    {code:"rail_siding",name:"铁路专用线",kind:"布尔",opts:"是 / 否",unit:"—",store:"EXT",required:false,usedBy:[]},
+    {code:"hazard_license",name:"危化品资质",kind:"布尔",opts:"是 / 否",unit:"—",store:"EXT",required:false,usedBy:["危化品资质场站"]}
+  ]},
+  {code:"WHARF",name:"码头",status:"ENABLED",resCount:33,attrs:[
+    {code:"ownership",name:"权属",kind:"枚举",opts:"自有 / 租赁 / 合作",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"operation_status",name:"运营状态",kind:"枚举",opts:"运营中 / 建设中 / 停用",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"wharf_type",name:"码头类型",kind:"枚举",opts:"集装箱 / 重件 / 散货 / 滚装",unit:"—",store:"EXT",required:true,usedBy:["重件码头"]},
+    {code:"berth_count",name:"泊位数",kind:"数值",opts:"—",unit:"个",store:"EXT",required:false,usedBy:[]},
+    {code:"throughput",name:"吞吐能力",kind:"数值",opts:"—",unit:"万吨/年",store:"EXT",required:false,usedBy:[]},
+    {code:"water_depth",name:"前沿水深",kind:"数值",opts:"—",unit:"米",store:"EXT",required:false,usedBy:[]}
+  ]},
+  {code:"VESSEL",name:"船舶",status:"DISABLED",resCount:25,attrs:[
+    {code:"ownership",name:"权属",kind:"枚举",opts:"自有 / 租赁 / 合作",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"operation_status",name:"运营状态",kind:"枚举",opts:"运营中 / 建设中 / 停用",unit:"—",store:"FIXED",required:true,usedBy:[]},
+    {code:"vessel_type",name:"船型",kind:"枚举",opts:"集装箱船 / 散货船 / 多用途船",unit:"—",store:"EXT",required:true,usedBy:[]},
+    {code:"deadweight",name:"载重吨",kind:"数值",opts:"—",unit:"DWT",store:"EXT",required:false,usedBy:[]},
+    {code:"teu_slots",name:"箱位数",kind:"数值",opts:"—",unit:"TEU",store:"EXT",required:false,usedBy:[]},
+    {code:"built_year",name:"建造年份",kind:"数值",opts:"—",unit:"年",store:"EXT",required:false,usedBy:[]}
+  ]}
+];
+let attrCurType="WAREHOUSE";
+function renderTypes(){
+  const tb=$("#typeTbody");if(!tb)return;
+  tb.innerHTML=RES_TYPES.map(t=>`<tr>
+    <td class="data-table__cell"><code>${esc(t.code)}</code></td>
+    <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;">${esc(t.name)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${t.attrs.length}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${t.resCount}</span></td>
+    <td class="data-table__cell">${t.status==="ENABLED"?'<span class="status-tag status-tag--success">启用</span>':'<span class="status-tag status-tag--gray">停用</span>'}</td>
+    <td class="data-table__cell" style="white-space:nowrap;">
+      <button class="link-btn" data-gotype="${t.code}">管理属性</button>
+      <button class="link-btn">编辑</button>
+      <button class="link-btn danger" ${t.resCount?"disabled title=\"存在在用资源，服务端会拒绝删除\"":""}>删除</button>
+    </td></tr>`).join("");
+  tb.querySelectorAll("[data-gotype]").forEach(b=>b.onclick=()=>{
+    attrCurType=b.dataset.gotype;switchTab("meta-attr");
+    const sel=$("#attrTypeSel");if(sel)sel.value=attrCurType;
+    renderAttrs();
+  });
+}
+function renderAttrs(){
+  const tb=$("#attrTbody");if(!tb)return;
+  const t=RES_TYPES.find(x=>x.code===attrCurType)||RES_TYPES[0];
+  const store=$("#attrStoreSel")?$("#attrStoreSel").value:"";
+  const kind=$("#attrKindSel")?$("#attrKindSel").value:"";
+  const list=t.attrs.filter(a=>(!store||a.store===store)&&(!kind||a.kind===kind));
+  const fixed=list.filter(a=>a.store==="FIXED").length;
+  $("#attrTitle").innerHTML=`属性清单 — ${esc(t.name)} <span class="sub">共 ${t.attrs.length} 个属性 · 固定列 ${t.attrs.filter(a=>a.store==="FIXED").length} 个 · 扩展 JSON ${t.attrs.filter(a=>a.store==="EXT").length} 个</span>`;
+  if(!list.length){
+    tb.innerHTML=`<tr><td class="data-table__cell" colspan="9">${emptyState("当前筛选条件下没有属性——试试清空「存储方式」或「数据类型」筛选")}</td></tr>`;return;
+  }
+  tb.innerHTML=list.map(a=>`<tr>
+    <td class="data-table__cell"><code>${esc(a.code)}</code></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(a.name)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(a.kind)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${esc(a.opts)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(a.unit)}</span></td>
+    <td class="data-table__cell">${a.store==="FIXED"?'<span class="status-tag">固定列</span>':'<span class="status-tag status-tag--gray">扩展 JSON</span>'}</td>
+    <td class="data-table__cell"><span class="data-table__content">${a.required?"是":"否"}</span></td>
+    <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${a.usedBy.length?a.usedBy.map(n=>esc(n)).join("、"):'<span style="color:var(--text-disabled);">未被引用</span>'}</span></td>
+    <td class="data-table__cell" style="white-space:nowrap;">
+      <button class="link-btn" data-act="attrEdit" data-attr="${esc(a.code)}">编辑</button>
+      <button class="link-btn danger" data-act="attrDel" data-attr="${esc(a.code)}" data-used="${a.usedBy.length}" ${a.store==="FIXED"?"disabled title=\"固定列属性不可删除（ADR-0014）\"":""}>删除</button>
+    </td></tr>`).join("");
+}
+
+/* ================= 筛选（所有查询栏控件即时生效，不留摆设） ================= */
+const v=(sel)=>{const el=$(sel);return el?el.value.trim():"";};
+/* 静态表格的通用行过滤：按列文本匹配，criteria=[{col,value}] */
+function filterStaticRows(tbodySel,criteria,hintSel,totalSel){
+  const rows=[...(document.querySelector(tbodySel)||{querySelectorAll:()=>[]}).querySelectorAll("tr")];
+  let shown=0;
+  rows.forEach(tr=>{
+    const cells=[...tr.children].map(td=>td.innerText);
+    const ok=criteria.every(c=>!c.value||(cells[c.col]||"").includes(c.value));
+    tr.hidden=!ok;if(ok)shown++;
+  });
+  const hint=$(hintSel);
+  if(hint){
+    const active=criteria.filter(c=>c.value).length;
+    hint.textContent=active?`筛选生效 · 显示 ${shown} / ${rows.length} 条`:`共 ${rows.length} 条`;
+  }
+  const total=$(totalSel);
+  if(total)total.textContent=`共 ${shown} 条`;
+  return shown;
+}
+/* —— 资源台账 —— */
+function filterResources(){
+  const kw=v("#resKw"),ty=v("#resType"),st=v("#resStatus"),rg=v("#resRegion");
+  return RESOURCES.filter(r=>(!kw||r.name.includes(kw)||r.id.includes(kw))
+    &&(!ty||r.type===ty)&&(!st||r.status===st)&&(!rg||(r.region||"").startsWith(rg)));
+}
+function refreshResHint(list){
+  const hint=$("#resFilterHint");if(!hint)return;
+  const active=[v("#resKw"),v("#resType"),v("#resStatus"),v("#resRegion")].filter(Boolean).length;
+  hint.textContent=active?`筛选生效 · 命中 ${list.length} / ${RESOURCES.length} 条`:`共 ${RESOURCES.length} 条资源`;
+  $("#resScope").textContent=active?`数据范围：华中区域及下级单位 · 已筛选`:"数据范围：华中区域及下级单位";
+}
+/* —— 标签管理 —— */
+const TAG_STATUS_TEXT={DRAFT:"草稿",EFFECTIVE:"生效中",EXPIRED:"已失效",DISABLED:"已停用"};
+function filterTags(){
+  const kw=v("#tagKw"),ty=v("#tagTypeFilter"),st=v("#tagStatusFilter"),sc=v("#tagScopeFilter");
+  return TAGS.filter(t=>(!kw||t.name.includes(kw))
+    &&(!ty||(ty==="分类标签"?t.type==="分类":t.type==="分级"))
+    &&(!st||TAG_STATUS_TEXT[t.status]===st)
+    &&(!sc||t.scope.includes(sc)));
+}
+function refreshTagHint(list){
+  const hint=$("#tagFilterHint");if(!hint)return;
+  const active=[v("#tagKw"),v("#tagTypeFilter"),v("#tagStatusFilter"),v("#tagScopeFilter")].filter(Boolean).length;
+  hint.textContent=active?`筛选生效 · 命中 ${list.length} / ${TAGS.length} 条`:`共 ${TAGS.length} 条标签`;
+}
+/* —— 匹配任务 / 审计（静态表） —— */
+function applyMatchFilter(){
+  filterStaticRows("#page-match-task tbody",
+    [{col:1,value:v("#matchTriggerFilter")},{col:9,value:v("#matchStatusFilter")}],
+    "#matchFilterHint");
+}
+function applyAuditFilter(){
+  filterStaticRows("#page-audit-log tbody",
+    [{col:1,value:v("#auditUserFilter")},{col:2,value:v("#auditActionFilter")},{col:6,value:v("#auditResultFilter")}],
+    "#auditFilterHint");
+}
+/* 绑定：变更即生效（输入框 300ms 防抖），无需点「查询」 */
+function bindFilterLive(){
+  const live=(sel,fn)=>{const el=$(sel);if(!el)return;
+    el.addEventListener("change",fn);
+    if(el.tagName==="INPUT"){let t=null;el.addEventListener("input",()=>{clearTimeout(t);t=setTimeout(fn,300);});}};
+  ["#resKw","#resType","#resStatus","#resRegion"].forEach(s=>live(s,()=>{const l=filterResources();renderResources(l);refreshResHint(l);}));
+  ["#tagKw","#tagTypeFilter","#tagStatusFilter","#tagScopeFilter"].forEach(s=>live(s,()=>{const l=filterTags();renderTags(l);refreshTagHint(l);}));
+  ["#matchTriggerFilter","#matchStatusFilter"].forEach(s=>live(s,applyMatchFilter));
+  ["#auditUserFilter","#auditActionFilter","#auditResultFilter"].forEach(s=>live(s,applyAuditFilter));
+}
+
 /* ================= 审计 ================= */
 function addAudit(action,obj,note){
   /* 原型演示：审计写入以 toast 提示代替 */
@@ -2176,33 +2476,73 @@ function nlToTree(text){
   return {tree,usedFields,unknown};
 }
 
-/* —— 8.3 可用性状态 —— */
+/* —— 8.3 可用性状态：三处入口（规则配置页 / AI 助手页 / 工作台卡片）共用同一状态 —— */
+function aiSimChecked(){
+  return ["#aiSimulate","#aiAstSimulate"].some(s=>{const el=$(s);return el&&el.querySelector("input").checked;});
+}
 function renderAiStatus(){
+  const on=AI.available;
+  /* ① 规则配置页 */
   const badge=$("#aiBadge"),meta=$("#aiMeta");
-  if(!badge)return;
-  if(AI.available){
-    badge.textContent="服务可用";badge.style.background="var(--success-bg)";badge.style.color="var(--success)";
-    meta.textContent=`主路径 LLM · ${AI.model} · 降级可用 · 检测于 ${AI.lastCheckAt}`;
-  }else{
-    badge.textContent="已降级";badge.style.background="var(--warning-bg)";badge.style.color="var(--warning)";
-    meta.textContent=`降级原因：${AI.degradedReason||"模型不可用"} · 主路径已切至规则解析器（FALLBACK）`;
+  if(badge){
+    if(on){badge.textContent="服务可用";badge.style.background="var(--success-bg)";badge.style.color="var(--success)";}
+    else{badge.textContent="已降级";badge.style.background="var(--warning-bg)";badge.style.color="var(--warning)";}
   }
+  if(meta)meta.textContent=on?`主路径 LLM · ${AI.model} · 降级可用 · 检测于 ${AI.lastCheckAt}`
+    :`降级原因：${AI.degradedReason||"模型不可用"} · 主路径已切至规则解析器（FALLBACK）`;
+  /* ② AI 助手页 */
+  const b2=$("#aiAstBadge");
+  if(b2){
+    b2.textContent=on?"服务可用":"已降级";
+    b2.className="status-tag "+(on?"status-tag--success":"status-tag--warning");
+    b2.style.height="26px";b2.style.width="fit-content";
+  }
+  const d2=$("#aiAstDegraded");if(d2)d2.textContent=on?"未发生降级":`降级原因：${AI.degradedReason||"模型不可用"}`;
+  const m2=$("#aiAstMode");if(m2)m2.textContent=on?"LLM（内网自建模型）":"FALLBACK（规则解析器）";
+  const mo2=$("#aiAstModel");if(mo2)mo2.textContent=on?AI.model:"模型端点无响应，已切换";
+  const f2=$("#aiAstFallback");if(f2)f2.textContent=AI.fallbackAvailable?"规则解析器（就绪）":"规则解析器（未就绪）";
+  const c2=$("#aiAstCheckAt");if(c2)c2.textContent=AI.lastCheckAt;
+  /* ③ 工作台卡片 */
+  const b3=$("#dashAiBadge");
+  if(b3){
+    b3.textContent=on?"服务可用":"已降级";
+    b3.style.background=on?"var(--success-bg)":"var(--warning-bg)";
+    b3.style.color=on?"var(--success)":"var(--warning)";
+  }
+  const m3=$("#dashAiMeta");
+  if(m3)m3.textContent=on?`主路径 ${AI.model} · 降级可用`:`已降级到规则解析器 · ${AI.degradedReason||"模型不可用"}`;
+  /* 两侧开关同步 */
+  ["#aiSimulate","#aiAstSimulate"].forEach(s=>{const el=$(s);if(el){const cb=el.querySelector("input");if(cb)cb.checked=!on;}});
 }
 function checkAiStatus(){
   AI.lastCheckAt="2026-10-15 "+new Date().toTimeString().slice(0,5);
-  AI.available=!$("#aiSimulate")||!$("#aiSimulate").querySelector("input").checked;
+  AI.available=!aiSimChecked();
   AI.degradedReason=AI.available?null:"模型网关无响应（演示开关）";
   renderAiStatus();
   toast(AI.available?`AI 可用性检测：主路径 LLM 正常（${AI.model}）`:"AI 可用性检测：模型不可用，已降级到规则解析器，能力不中断",
     AI.available?"success":"warning");
 }
+/* 降级开关：两个入口任一被勾选，全局状态同步 */
+function bindAiSimulate(){
+  ["#aiSimulate","#aiAstSimulate"].forEach(s=>{
+    const el=$(s);if(!el)return;
+    el.querySelector("input").onchange=e=>{
+      AI.available=!e.target.checked;
+      AI.degradedReason=e.target.checked?"模型网关无响应（演示开关）":null;
+      AI.lastCheckAt="2026-10-15 "+new Date().toTimeString().slice(0,5);
+      renderAiStatus();
+      toast(e.target.checked?"已模拟模型不可用：AI 能力将走规则解析器降级路径（功能不中断）":"已恢复：AI 能力走主路径 LLM",
+        e.target.checked?"warning":"success");
+    };
+  });
+}
 
-/* —— 8.1 自然语言转规则 —— */
-function aiRuleDraft(){
-  const txt=$("#aiText").value.trim();
+/* —— 8.1 自然语言转规则（规则配置页与 AI 助手页共用） —— */
+function aiRuleDraft(textOverride){
+  const txt=(typeof textOverride==="string"?textOverride:($("#aiText")||{value:""}).value).trim();
   if(!txt){toast("请输入自然语言描述","warning");return;}
   const parsed=nlToTree(txt);
-  const simulatedOff=$("#aiSimulate")&&$("#aiSimulate").querySelector("input").checked;
+  const simulatedOff=aiSimChecked();
   let source=simulatedOff||!AI.available?"FALLBACK":"LLM";
   const warnings=[];
   if(simulatedOff||!AI.available)warnings.push("模型不可用/超时，已降级到规则解析器 NaturalLanguageRuleParser");
@@ -2249,6 +2589,7 @@ function aiRuleDraft(){
     {label:validated?"应用到编辑器":"仅保留可用条件",
      cls:"btn-primary",
      onClick:m=>{
+/* 应用草案后跳到规则编辑器，让用户看见落地结果 */
        const applyTree=tt=>{
          ruleTree=tt;renderRuleBuilder();
          if(scopeHint){
@@ -2256,6 +2597,7 @@ function aiRuleDraft(){
            if(t){t.scope=[scopeHint];renderTags();
              toast(`资源类型条件已映射为标签作用范围（${scopeHint}，§2.2.1）`,"info");}
          }
+         if(curTab!=="rule-config")switchTab("rule-config");
        };
        if(validated){applyTree(JSON.parse(JSON.stringify(wtree)));
          toast("已应用到规则编辑器，可微调后保存","success");}
@@ -2307,7 +2649,8 @@ function aiTagRecommend(presetText){
   };
   body.querySelector("#aiRecGo").onclick=run;
   body.querySelectorAll("[data-rec]").forEach(c=>c.onclick=()=>{body.querySelector("#aiRecText").value=c.dataset.rec;run();});
-  if(!presetText)renderRecResult(body,body.querySelector("#aiRecText").value);
+  /* 无论是否带预设文本都立即出结果（此前带预设时首次不渲染，弹窗空白） */
+  renderRecResult(body,body.querySelector("#aiRecText").value);
 }
 function renderRecResult(box,txt){
   const source=AI.available?"LLM":"FALLBACK";
@@ -2387,40 +2730,86 @@ document.addEventListener("click",e=>{
   const act=e.target.closest("[data-act]");if(!act)return;
   const a=act.dataset.act;
   if(a==="resSearch"){
-    const kw=$("#resKw").value.trim(),ty=$("#resType").value;
-    const list=RESOURCES.filter(r=>(!kw||r.name.includes(kw)||r.id.includes(kw))&&(!ty||r.type===ty));
-    renderResources(list);
-    toast(`查询完成 · 命中 ${list.length} 条`,"info");
+    const list=filterResources();
+    renderResources(list);refreshResHint(list);
+    toast(list.length?`查询完成 · 命中 ${list.length} 条`:"没有符合条件的资源——试试放宽筛选条件",list.length?"info":"warning");
   }
-  else if(a==="resReset"){$("#resKw").value="";$("#resType").value="";renderResources(RESOURCES);}
+  else if(a==="resReset"){$("#resKw").value="";$("#resType").value="";$("#resStatus").value="";$("#resRegion").value="";
+    renderResources(RESOURCES);refreshResHint(RESOURCES);toast("筛选条件已重置","info");}
   else if(a==="resNew")openModal({title:"新建资源",body:resForm(),foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
     const name=m.querySelector("#rfName").value.trim();
     m.querySelector("#rfName").closest(".form-item").classList.toggle("has-error",!name);
     if(!name)return;
-    RESOURCES.unshift({id:"R00"+(RESOURCES.length+9),name,type:m.querySelector("#rfType").value,wType:m.querySelector("#rfWType").value,area:+m.querySelector("#rfArea").value||0,own:m.querySelector("#rfOwn").value,status:m.querySelector("#rfStatus").value,region:"湖北 · 武汉",org:"华中区域公司",tags:[]});
-    renderResources(RESOURCES);m.remove();toast("资源已创建 · 数据范围校验通过（本单位及下级）","success");
+    const region=m.querySelector("#rfRegion").value;
+    RESOURCES.unshift({id:"R00"+(RESOURCES.length+9),name,type:m.querySelector("#rfType").value,wType:m.querySelector("#rfWType").value,area:+m.querySelector("#rfArea").value||0,own:m.querySelector("#rfOwn").value,status:m.querySelector("#rfStatus").value,region,org:"华中区域公司",tags:[]});
+    m.remove();
+    renderResources();refreshResHint(filterResources());
+    toast(`资源已创建（所属区域：${region}）· 数据范围校验通过（本单位及下级）`,"success");
   }}]});
   else if(a==="resImport")confirmDialog({title:"批量导入",okLabel:"开始校验",
     html:"上传 Excel 后<b>逐行校验数据范围与必填属性</b>：任一行越权或缺失必填项，整批回滚并逐行报错（附录 3）。<br><br>原型示意：选择文件后开始校验。",onOk:()=>toast("校验完成：24 行全部通过，已导入","success")});
   else if(a==="resDetail"){const r=RESOURCES.find(x=>x.id===act.dataset.res)||RESOURCES.find(x=>x.id===act.getAttribute("data-res"));r&&resourceDetail(r);}
   else if(a==="resEdit")toast("编辑资源（原型示意）","info");
-  else if(a==="tagSearch")toast("查询完成 · 命中 9 条","info");
+  else if(a==="tagSearch"){const l=filterTags();renderTags(l);
+    toast(l.length?`查询完成 · 命中 ${l.length} 条标签`:"没有符合条件的标签",l.length?"info":"warning");}
+  else if(a==="tagFilterReset"){$("#tagKw").value="";$("#tagTypeFilter").value="";$("#tagStatusFilter").value="";$("#tagScopeFilter").value="";
+    renderTags(TAGS);toast("标签筛选条件已清空","info");}
+  else if(a==="resFilterReset"){$("#resKw").value="";$("#resType").value="";$("#resStatus").value="";$("#resRegion").value="";
+    renderResources(RESOURCES);refreshResHint(RESOURCES);toast("资源筛选条件已清空","info");}
+  else if(a==="auditSearch"){const n=applyAuditFilter();
+    toast(n?`查询完成 · 命中 ${n} 条`:"没有符合条件的操作记录",n?"info":"warning");}
+  else if(a==="auditReset"){$("#auditUserFilter").value="";$("#auditActionFilter").value="";$("#auditResultFilter").value="";
+    applyAuditFilter();toast("筛选条件已重置","info");}
   else if(a==="tagNew")tagFormModal(null);
   else if(a==="tagPublish"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&publishTag(t);}
   else if(a==="tagDisable"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&disableTag(t);}
   else if(a==="tagEdit"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&tagFormModal(t);}
   else if(a==="tagRule"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&tagRuleModal(t);}
-  else if(a==="attrNew")openModal({title:"新增资源属性",body:`
+  else if(a==="attrNew"){
+    const t=RES_TYPES.find(x=>x.code===attrCurType)||RES_TYPES[0];
+    openModal({title:`新增资源属性 — ${t.name}`,body:`
     <div class="form-grid">
-      <div class="form-item"><label>属性编码 <span class="req">*</span></label><input class="input" placeholder="如 temperature_zone"></div>
-      <div class="form-item"><label>属性名称 <span class="req">*</span></label><input class="input" placeholder="如 温区"></div>
-      <div class="form-item"><label>数据类型</label><select class="select"><option>枚举</option><option>数值</option><option>文本</option><option>日期</option><option>布尔</option></select></div>
-      <div class="form-item"><label>单位</label><input class="input" placeholder="选填"></div>
-      <div class="form-item form-item--full"><label>可选值（枚举类型，逗号分隔）</label><input class="input" placeholder="冷藏, 冷冻, 恒温"></div>
+      <div class="form-item form-item--full"><label>归属资源类型</label><input class="input" value="${esc(t.name)}（${esc(t.code)}）" disabled><span class="hint">属性属于某个资源类型；如需跨类型共用请分别定义</span></div>
+      <div class="form-item"><label>属性编码 <span class="req">*</span></label><input class="input" id="anCode" placeholder="如 temperature_zone"><span class="err">请输入属性编码</span></div>
+      <div class="form-item"><label>属性名称 <span class="req">*</span></label><input class="input" id="anName" placeholder="如 温区"><span class="err">请输入属性名称</span></div>
+      <div class="form-item"><label>数据类型</label><select class="select" id="anKind"><option>枚举</option><option>数值</option><option>文本</option><option>日期</option><option>布尔</option></select></div>
+      <div class="form-item"><label>单位</label><input class="input" id="anUnit" placeholder="选填，如 ㎡ / TEU"></div>
+      <div class="form-item form-item--full"><label>可选值（枚举类型，逗号分隔）</label><input class="input" id="anOpts" placeholder="冷藏, 冷冻, 恒温"></div>
+      <div class="form-item form-item--full"><label>是否必填</label>
+        <div class="radio-line"><label><input type="radio" name="anReq" value="1"> 必填</label><label><input type="radio" name="anReq" value="0" checked> 选填</label></div></div>
     </div>
-    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">新增属性走元数据表，<b>零 DDL</b>；存储于扩展 JSON，高频使用后可升级为表达式索引（ADR-0014）。</p>`,
-    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{m.remove();toast("属性已创建，资源录入页即刻可用","success");}}]});
-  else if(a==="attrManage")toast("已定位到「仓库」类型属性清单（下方列表）","info");
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">新增属性走元数据表，<b>零 DDL</b>，存入 <code>ext_json</code>；高频且需下推 SQL 时可升级为<b>表达式索引</b>（ADR-0014）。</p>`,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+      const code=m.querySelector("#anCode").value.trim(),name=m.querySelector("#anName").value.trim();
+      let ok=true;
+      m.querySelector("#anCode").closest(".form-item").classList.toggle("has-error",!code);ok&&=!!code;
+      m.querySelector("#anName").closest(".form-item").classList.toggle("has-error",!name);ok&&=!!name;
+      if(!ok)return;
+      if(t.attrs.some(x=>x.code===code)){toast(`属性编码「${code}」在${t.name}下已存在（唯一约束）`,"danger");return;}
+      t.attrs.push({code,name,kind:m.querySelector("#anKind").value,opts:m.querySelector("#anOpts").value.trim()||"—",
+        unit:m.querySelector("#anUnit").value.trim()||"—",store:"EXT",required:m.querySelector('input[name=anReq]:checked').value==="1",usedBy:[]});
+      m.remove();renderAttrs();renderTypes();
+      const sel=$("#attrTypeSel");if(sel)sel.value=attrCurType;
+      toast(`属性「${name}」已创建 · ${t.name}资源录入页即刻可用（零 DDL）`,"success");
+      addAudit("新增资源属性",name,t.name);}}]});
+  }
+  else if(a==="attrManage"){attrCurType="WAREHOUSE";switchTab("meta-attr");
+    const sel=$("#attrTypeSel");if(sel)sel.value=attrCurType;renderAttrs();}
+  else if(a==="attrEdit")toast(`编辑属性「${act.dataset.attr}」（原型示意）· 改数据类型会影响已存数据的解析口径`,"info");
+  else if(a==="attrDel"){
+    const used=+act.dataset.used;
+    if(used>0){
+      openModal({title:"删除被规则引用的属性 — 被拒绝",body:`
+        <div class="match-callout">${svg.err}<div>属性 <code>${esc(act.dataset.attr)}</code> 正被 <b>${used}</b> 条打标规则引用，删除会使规则校验失败、匹配任务中断（历史就发生过：规则引用属性被删导致 M-20261014-007 任务失败）。</div></div>
+        <p style="margin-top:12px;font-size:13px;">处理建议：先到「打标规则配置」把这些规则改成引用其他属性，或恢复该属性后再删除。</p>`,
+        foot:[{label:"知道了"},{label:"去修改规则",cls:"btn-primary",onClick:m=>{m.remove();switchTab("rule-config");}}]});
+      return;
+    }
+    confirmDialog({title:"删除资源属性",danger:true,okLabel:"确认删除",
+      html:`删除属性 <code>${esc(act.dataset.attr)}</code> 后，该类型资源在 <code>ext_json</code> 中的对应取值不再被读取（<b>数据保留但不展示</b>，不做物理删除）。<br>${act.dataset.attr==="ownership"||act.dataset.attr==="operation_status"?"":""}`,
+      onOk:()=>{const t=RES_TYPES.find(x=>x.code===attrCurType);
+        t.attrs=t.attrs.filter(x=>x.code!==act.dataset.attr);renderAttrs();renderTypes();
+        toast("属性已删除 · 新增属性零 DDL，删除同样不改表结构","success");addAudit("删除资源属性",act.dataset.attr,t.name);}});}
   else if(a==="typeNew")openModal({title:"新建资源类型",body:`
     <div class="form-grid">
       <div class="form-item"><label>类型编码 <span class="req">*</span></label><input class="input" placeholder="如 RAIL_SIDING"></div>
@@ -2432,6 +2821,12 @@ document.addEventListener("click",e=>{
   else if(a==="ruleEmpty"){ruleTree={logic:"AND",children:[]};renderRuleBuilder();
     setTimeout(()=>{toast("空条件组校验：保存被拒绝（见预览区提示）","danger");ruleTree=defaultRule();renderRuleBuilder();},900);}
   else if(a==="aiRuleDraft")aiRuleDraft();
+  else if(a==="aiAstDraft")aiRuleDraft($("#aiAstText").value);
+  else if(a==="aiAstRec")aiTagRecommend($("#aiAstRecText").value);
+  else if(a==="aiGoto")switchTab("ai-assistant");
+  else if(a==="aiGotoRule"){switchTab("rule-config");toast("已跳到「打标规则配置」· AI 生成的草案在下方编辑器中应用","info");}
+  else if(a==="aiGotoRec"){switchTab("ai-assistant");
+    setTimeout(()=>{const t=$("#aiAstRecText");if(t){t.scrollIntoView({block:"center"});aiTagRecommend(t.value);}},150);}
   else if(a==="aiStatus")checkAiStatus();
   else if(a==="aiTagRecommend")aiTagRecommend();
   else if(a==="matchRun")simulateMatch("全部生效标签");
@@ -2503,16 +2898,11 @@ $$("[data-qtab]").forEach(ch=>ch.onclick=()=>{
 $("#ruleTag").onchange=loadRuleBuilder;
 /* AI 示例 chip */
 $$(".ai-chip[data-ai]").forEach(c=>c.onclick=()=>{$("#aiText").value=c.dataset.ai;});
-/* 模拟模型不可用开关：勾选即切到降级路径（演示 ADR-0007 降级不中断能力） */
-const aiSim=$("#aiSimulate");
-if(aiSim)aiSim.querySelector("input").onchange=e=>{
-  AI.available=!e.target.checked;
-  AI.degradedReason=e.target.checked?"模型网关无响应（演示开关）":null;
-  AI.lastCheckAt="2026-10-15 "+new Date().toTimeString().slice(0,5);
-  renderAiStatus();
-  toast(e.target.checked?"已模拟模型不可用：AI 能力将走规则解析器降级路径（功能不中断）":"已恢复：AI 能力走主路径 LLM",
-    e.target.checked?"warning":"success");
-};
+/* AI 助手页的示例 chip */
+$$(".ai-chip[data-aichip]").forEach(c=>c.onclick=()=>{$("#aiAstText").value=c.dataset.aichip;});
+$$(".ai-chip[data-aichiprec]").forEach(c=>c.onclick=()=>{$("#aiAstRecText").value=c.dataset.aichiprec;aiTagRecommend(c.dataset.aichiprec);});
+/* 降级开关（规则配置页与 AI 助手页两处联动） */
+bindAiSimulate();
 
 /* 资源新建表单 */
 function resForm(){
@@ -2523,7 +2913,7 @@ function resForm(){
     <div class="form-item"><label>面积（㎡）</label><input class="input" id="rfArea" type="number" placeholder="如 5000"></div>
     <div class="form-item"><label>权属</label><select class="select" id="rfOwn"><option>自有</option><option>租赁</option><option>合作</option></select></div>
     <div class="form-item"><label>运营状态</label><select class="select" id="rfStatus"><option>运营中</option><option>建设中</option><option>停用</option></select></div>
-    <div class="form-item"><label>所属区域</label><select class="select"><option>湖北 · 武汉</option><option>湖南 · 长沙</option><option>河南 · 郑州</option></select></div>
+    <div class="form-item"><label>所属区域</label><select class="select" id="rfRegion"><option>湖北 · 武汉</option><option>湖北 · 襄阳</option><option>湖南 · 长沙</option><option>湖南 · 岳阳</option><option>河南 · 郑州</option><option>河南 · 新乡</option></select></div>
     <div class="form-item"><label>管理主体</label><input class="input" value="华中区域公司" disabled><span class="hint">默认当前数据范围单位</span></div>
   </div>
   <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">※ 数据权限：只能录入本单位及下级单位的资源，越权录入将被拒绝（附录 3）。</p>`;
@@ -2542,6 +2932,22 @@ renderPermMatrix();
 renderPermDict();
 renderUsers();
 renderSessionMenu();
+renderTypes();
+/* 资源属性页：类型下拉 + 筛选联动 */
+(()=>{
+  const sel=$("#attrTypeSel");
+  if(sel){
+    sel.innerHTML=RES_TYPES.map(t=>`<option value="${t.code}">${esc(t.name)}（${t.attrs.length} 个属性）</option>`).join("");
+    sel.value=attrCurType;
+    sel.onchange=()=>{attrCurType=sel.value;renderAttrs();};
+  }
+  ["#attrStoreSel","#attrKindSel"].forEach(s=>{const el=$(s);if(el)el.onchange=renderAttrs;});
+})();
+renderAttrs();
+bindFilterLive();
+refreshResHint(RESOURCES);
+refreshTagHint(TAGS);
+renderAiStatus();
 /* 用户筛选下拉：角色与单位选项 */
 (()=>{
   const rf=$("#userRoleFilter"),of=$("#userOrgFilter");
