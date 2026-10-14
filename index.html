@@ -227,6 +227,9 @@ button{font-family:inherit;}
 .btn-default:hover{background:var(--secondary);color:var(--primary);border-color:#BBD4EE;}
 .btn-danger{background:var(--surface);color:var(--danger);border-color:#FFC9C9;}
 .btn-danger:hover{background:var(--danger-bg);}
+/* 禁用态：统一使用 --disabled-bg / --text-disabled（规范 7.4） */
+.btn:disabled,.btn:disabled:hover{background:var(--disabled-bg);color:var(--text-disabled);border-color:var(--border);cursor:not-allowed;}
+.btn-primary:disabled,.btn-primary:disabled:hover{background:var(--disabled-bg);color:var(--text-disabled);border-color:var(--disabled-bg);}
 .link-btn{border:none;background:none;color:var(--primary);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;}
 .link-btn:hover{background:var(--secondary);}
 .link-btn.danger{color:var(--danger);}
@@ -408,6 +411,40 @@ button{font-family:inherit;}
 .section-h{font-size:13px;font-weight:600;color:var(--text-caption);margin:16px 0 8px;}
 .section-h:first-child{margin-top:0;}
 
+/* 组织树 */
+.org-layout{display:grid;grid-template-columns:minmax(320px,1fr) minmax(320px,1fr);gap:12px;align-items:start;}
+.org-tree{user-select:none;}
+.org-node__row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:4px;cursor:pointer;transition:background var(--duration-fast) var(--ease-out);}
+.org-node__row:hover{background:var(--secondary);}
+.org-node__row.is-selected{background:var(--secondary);color:var(--primary);font-weight:600;box-shadow:inset 0 0 0 1px var(--border);}
+.org-toggle{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-caption);}
+.org-toggle svg{transition:transform var(--duration-fast) var(--ease-out);}
+.org-toggle.is-open svg{transform:rotate(90deg);}
+.org-toggle.is-leaf{visibility:hidden;}
+.org-node__name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.org-node__tag{font-size:11px;color:var(--text-caption);background:#F2F2F3;border-radius:3px;padding:1px 6px;flex-shrink:0;}
+.org-children{margin-left:18px;padding-left:8px;border-left:1px dashed var(--border);}
+.scope-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--text-caption);align-items:center;}
+.scope-legend i{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:-2px;margin-right:4px;}
+.org-node__row.is-writable{background:#F2F8FF;}
+.org-node__row.is-ancestor{background:#FFFAF4;}
+/* 权限矩阵 */
+.perm-group{border:1px solid var(--border-light);border-radius:6px;padding:12px;margin-bottom:12px;}
+.perm-group__title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.perm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;}
+.perm-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;cursor:pointer;}
+.perm-item:hover{border-color:var(--primary);}
+.perm-item.is-on{background:var(--secondary);border-color:#BBD4EE;}
+.perm-item.is-locked{opacity:0.85;cursor:not-allowed;}
+.perm-item code{font-family:Consolas,monospace;font-size:11.5px;color:var(--text-caption);display:block;margin-top:2px;}
+.perm-item .box{width:14px;height:14px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;background:var(--surface);}
+.perm-item.is-on .box{background:var(--primary);border-color:var(--primary);color:#fff;font-size:10px;}
+/* 会话上下文 */
+.session-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px;}
+.session-kv dt{color:var(--text-caption);white-space:nowrap;}
+.session-kv dd{margin:0;word-break:break-all;}
+.code-chip{display:inline-block;font-family:Consolas,monospace;font-size:11.5px;background:var(--secondary);color:var(--primary);border-radius:3px;padding:1px 6px;margin:0 4px 4px 0;}
+
 /* 移动端遮罩 */
 .mobile-mask{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:99;}
 
@@ -442,17 +479,10 @@ button{font-family:inherit;}
       <span class="avatar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.5" fill="#fff"/><path d="M4.5 19.5c1.6-3.2 4.3-5 7.5-5s5.9 1.8 7.5 5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
-      <span class="topbar__username">屈越 · 集团标签管理员</span>
+      <span class="topbar__username" id="topbarUser">屈越 · 系统管理员</span>
     </button>
   </header>
-  <div class="user-menu" id="userMenu" hidden role="menu">
-    <div class="user-menu__role">当前数据范围：华中区域（本单位及下级单位）</div>
-    <div class="user-menu__item is-current" role="menuitem">华中区域公司（当前）</div>
-    <div class="user-menu__item" role="menuitem">武汉分公司</div>
-    <div class="user-menu__item" role="menuitem">长沙分公司</div>
-    <div class="user-menu__item" role="menuitem">郑州分公司</div>
-    <div class="user-menu__item" role="menuitem" style="border-top:1px solid var(--border-light);margin-top:4px;color:var(--danger);">退出登录</div>
-  </div>
+  <div class="user-menu" id="userMenu" hidden role="menu" style="min-width:340px;"></div>
 
   <!-- ============ 侧边栏 ============ -->
   <nav class="sidebar" aria-label="主导航">
@@ -520,6 +550,9 @@ button{font-family:inherit;}
         </div>
         <div class="menu-children" id="grp-sys">
           <ul>
+            <li class="menu-item__child" data-page="org-tree" tabindex="0">组织架构</li>
+            <li class="menu-item__child" data-page="role-permission" tabindex="0">角色权限</li>
+            <li class="menu-item__child" data-page="user-list" tabindex="0">用户管理</li>
             <li class="menu-item__child" data-page="audit-log" tabindex="0">操作审计</li>
           </ul>
         </div>
@@ -799,6 +832,93 @@ button{font-family:inherit;}
         </div>
       </section>
 
+      <!-- ===== 页面：组织架构 ===== -->
+      <section class="page" id="page-org-tree" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond" style="font-size:12px;color:var(--text-caption);">
+              当前单位 <b id="orgCurName" style="color:var(--text-primary);">华中区域公司</b> · 物化路径 <code id="orgCurPath">/1/10/</code>
+            </span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="orgNew">＋ 新增下级单位</button>
+            <button class="btn btn-default btn-sm" data-act="orgMove">移动节点</button>
+          </div>
+        </div>
+        <div class="org-layout">
+          <div class="block">
+            <div class="block__title">组织树 <span class="sub">邻接表 parent_id 画树 · 物化路径 org_path 做权限前缀扫描</span></div>
+            <div class="scope-legend" style="margin-bottom:10px;">
+              <span><i style="background:#F2F8FF;border:1px solid #BBD4EE;"></i>可写子树 <code>org_path LIKE '/1/10/%'</code></span>
+              <span><i style="background:#FFFAF4;border:1px solid #FFD9C2;"></i>祖先链（只读可见）</span>
+              <span><i style="background:#F2F2F3;"></i>不可见（不在可读集合内）</span>
+            </div>
+            <div class="org-tree" id="orgTree"></div>
+          </div>
+          <div class="block" id="orgDetail"></div>
+        </div>
+      </section>
+
+      <!-- ===== 页面：角色权限 ===== -->
+      <section class="page" id="page-role-permission" hidden>
+        <div class="block">
+          <div class="block__title">角色列表 <span class="sub">功能权限（能不能用某功能）由角色决定；数据权限（能看能改哪些行）由组织树决定，二者分层</span>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;" data-act="roleNew">＋ 新建角色</button></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:820px;" id="roleTable">
+            <thead><tr>
+              <th class="data-table__cell">角色</th><th class="data-table__cell">角色编码</th><th class="data-table__cell">权限码数</th>
+              <th class="data-table__cell">数据范围</th><th class="data-table__cell">用户数</th><th class="data-table__cell">类型</th><th class="data-table__cell">操作</th>
+            </tr></thead>
+            <tbody id="roleTbody"></tbody>
+          </table></div>
+        </div>
+        <div class="block">
+          <div class="block__title" id="permTitle">权限配置</div>
+          <div id="permMatrix"></div>
+        </div>
+        <div class="block">
+          <div class="block__title">权限码字典 <span class="sub">共 18 个 · 数据范围要求决定该权限的作用边界</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:880px;">
+            <thead><tr><th class="data-table__cell">权限码</th><th class="data-table__cell">含义</th><th class="data-table__cell">数据范围要求</th><th class="data-table__cell">默认持有角色</th></tr></thead>
+            <tbody id="permDictTbody"></tbody>
+          </table></div>
+          <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">
+            ⚠️ 「不允许用功能权限的注解去拼数据行过滤条件」——那会把数据权限打散到每个接口、无法测试。
+            数据权限统一由 <code>DataScope</code> 产出 <code>OrgScope{自身, 可写子树, 可读组织集合}</code> 注入查询条件（ADR-0004）。
+          </p>
+        </div>
+      </section>
+
+      <!-- ===== 页面：用户管理 ===== -->
+      <section class="page" id="page-user-list" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:160px;" placeholder="用户名 / 姓名" id="userKw"></span>
+            <span class="cond"><label>角色</label>
+              <select class="select select-sm" id="userRoleFilter"><option value="">全部</option></select></span>
+            <span class="cond"><label>状态</label>
+              <select class="select select-sm" id="userStatusFilter"><option value="">全部</option><option>启用</option><option>停用</option><option>已锁定</option></select></span>
+            <span class="cond"><label>所属单位</label>
+              <select class="select select-sm" id="userOrgFilter"><option value="">全部</option></select></span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="userSearch">查询</button>
+            <button class="btn btn-primary btn-sm" data-act="userNew">＋ 新建用户</button>
+          </div>
+        </div>
+        <div class="block">
+          <div class="block__title">用户列表 <span class="sub">多角色 + 多单位（主单位决定默认数据范围）；口令策略 8 位以上且含大小写与数字</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:1020px;" id="userTable">
+            <thead><tr>
+              <th class="data-table__cell">用户名</th><th class="data-table__cell">姓名</th><th class="data-table__cell">角色</th>
+              <th class="data-table__cell">所属单位</th><th class="data-table__cell">联系方式</th><th class="data-table__cell">状态</th>
+              <th class="data-table__cell">最近登录</th><th class="data-table__cell" style="width:210px;">操作</th>
+            </tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
       <!-- ===== 页面：操作审计 ===== -->
       <section class="page" id="page-audit-log" hidden>
         <div class="filter-bar">
@@ -975,7 +1095,7 @@ $("#userBtn").onclick=e=>{e.stopPropagation();const m=$("#userMenu");m.hidden=!m
 document.addEventListener("click",e=>{if(!$("#userMenu").hidden&&!$("#userMenu").contains(e.target)&&e.target!==$("#userBtn")){$("#userMenu").hidden=true;}});
 
 /* 页签 */
-const PAGE_TITLES={dashboard:"工作台","resource-list":"资源台账","meta-type":"资源类型与属性","tag-list":"标签管理","rule-config":"打标规则配置","match-task":"自动匹配任务","query-center":"标签查询","audit-log":"操作审计"};
+const PAGE_TITLES={dashboard:"工作台","resource-list":"资源台账","meta-type":"资源类型与属性","tag-list":"标签管理","rule-config":"打标规则配置","match-task":"自动匹配任务","query-center":"标签查询","org-tree":"组织架构","role-permission":"角色权限","user-list":"用户管理","audit-log":"操作审计"};
 const tabs=[{id:"dashboard"}];let curTab="dashboard";
 function renderTabs(){
   const box=$("#tabsInner");box.innerHTML="";
@@ -996,6 +1116,10 @@ function switchTab(id){
   $$(".menu-item__parent").forEach(p=>p.classList.toggle("is-active",p.dataset.page===id||(p.classList.contains("has-children")&&$$('#grp-'+p.dataset.group+" .menu-item__child.is-selected").length>0)));
   if(id==="dashboard")renderDashTags();
   if(id==="rule-config")renderAiStatus();
+  if(id==="org-tree"){renderOrgTree();renderOrgDetail();}
+  if(id==="role-permission"){renderRoles();renderPermMatrix();}
+  if(id==="user-list")renderUsers();
+  applyPermissionUI();
 }
 function closeTab(id){
   const i=tabs.findIndex(t=>t.id===id);if(i<0)return;
@@ -1460,6 +1584,468 @@ function queryByTag(){
     <div class="table-footer"><span>共 ${list.length} 条</span></div></div>`;
 }
 
+/* ================= 组织 / 角色 / 权限 / 用户（Spec §3.5 §6、ADR-0004、API §2 §10） ================= */
+const ORG_TYPES={GROUP:"集团",COMPANY:"区域公司",BRANCH:"分公司",DEPARTMENT:"部门"};
+const ORGS=[
+  {id:1,   parent:null, code:"GROUP",    name:"中国外运集团",   type:"GROUP",      path:"/1/",         status:"ENABLED"},
+  {id:10,  parent:1,    code:"HD",       name:"华中区域公司",   type:"COMPANY",    path:"/1/10/",      status:"ENABLED"},
+  {id:11,  parent:1,    code:"HQ",       name:"华东区域公司",   type:"COMPANY",    path:"/1/11/",      status:"ENABLED"},
+  {id:100, parent:10,   code:"HD-WH",    name:"武汉分公司",     type:"BRANCH",     path:"/1/10/100/",  status:"ENABLED"},
+  {id:101, parent:10,   code:"HD-CS",    name:"长沙分公司",     type:"BRANCH",     path:"/1/10/101/",  status:"ENABLED"},
+  {id:102, parent:10,   code:"HD-ZZ",    name:"郑州分公司",     type:"BRANCH",     path:"/1/10/102/",  status:"ENABLED"},
+  {id:1001,parent:100,  code:"HD-WH-OPS",name:"武汉运营部",     type:"DEPARTMENT", path:"/1/10/100/1001/",status:"ENABLED"}
+];
+const MY_ORG_ID=10;                       /* 当前单位：华中区域公司（P = /1/10/） */
+const MY_PATH=ORGS.find(o=>o.id===MY_ORG_ID).path;
+const isWritable=o=>o.path.startsWith(MY_PATH);                       /* 可写子树 */
+const isAncestor=o=>MY_PATH.startsWith(o.path)&&o.id!==MY_ORG_ID;     /* 祖先链（只读可见） */
+const isReadable=o=>o.id===MY_ORG_ID||isWritable(o)||isAncestor(o);   /* 可读集合 */
+
+const PERM_GROUPS=[
+  {title:"资源元数据",codes:[
+    {c:"metadata:view",name:"查看资源类型与属性",scope:"无（全局元数据）"},
+    {c:"metadata:manage",name:"增删改资源类型与属性",scope:"无"}]},
+  {title:"资源",codes:[
+    {c:"resource:view",name:"查看资源",scope:"可读集合"},
+    {c:"resource:create",name:"新建资源",scope:"可写子树"},
+    {c:"resource:update",name:"修改资源、人工贴标/解标",scope:"可写子树"},
+    {c:"resource:delete",name:"删除资源",scope:"可写子树"},
+    {c:"resource:import",name:"批量导入资源",scope:"可写子树（逐行校验）"}]},
+  {title:"标签与规则",codes:[
+    {c:"tag:view",name:"查看标签与规则",scope:"全部可见（含发布单位）"},
+    {c:"tag:create",name:"新建标签",scope:"可写子树"},
+    {c:"tag:update",name:"修改标签与规则",scope:"发布单位在可写子树内"},
+    {c:"tag:delete",name:"删除标签",scope:"发布单位在可写子树内"},
+    {c:"tag:publish",name:"发布 / 停用标签",scope:"发布单位在可写子树内"}]},
+  {title:"匹配任务",codes:[
+    {c:"match:run",name:"执行匹配任务",scope:"发布单位在可写子树内"}]},
+  {title:"报表与导出",codes:[
+    {c:"report:view",name:"查看报表",scope:"可读集合"},
+    {c:"report:export",name:"导出数据",scope:"可读集合"}]},
+  {title:"AI 能力",codes:[
+    {c:"ai:use",name:"使用 AI 问答",scope:"可读集合"}]},
+  {title:"组织与审计",codes:[
+    {c:"org:manage",name:"组织、用户、角色管理",scope:"无"},
+    {c:"audit:view",name:"查看操作日志（审计）",scope:"按日志目标对象的可读集合"}]}
+];
+const ALL_PERMS=PERM_GROUPS.flatMap(g=>g.codes.map(x=>x.c));
+const ROLES=[
+  {code:"SYS_ADMIN",name:"系统管理员",builtin:true,scope:"全局",perms:ALL_PERMS.slice()},
+  {code:"GROUP_TAG_ADMIN",name:"集团标签管理员",builtin:true,scope:"全局（标签受发布单位约束）",
+   perms:["metadata:view","resource:view","resource:create","resource:update","resource:delete","resource:import",
+          "tag:view","tag:create","tag:update","tag:delete","tag:publish","match:run","report:view","report:export","ai:use"]},
+  {code:"ORG_TAG_ADMIN",name:"单位标签管理员",builtin:true,scope:"可写子树",
+   perms:["metadata:view","resource:view","resource:create","resource:update","resource:delete","resource:import",
+          "tag:view","tag:create","tag:update","tag:publish","report:view","ai:use"]},
+  {code:"READONLY",name:"只读查询",builtin:true,scope:"可读集合",
+   perms:["metadata:view","resource:view","tag:view","report:view"]},
+  {code:"WH_LEAD",name:"仓储主管（自定义）",builtin:false,scope:"可写子树",
+   perms:["metadata:view","resource:view","resource:update","tag:view","report:view"]}
+];
+const USERS=[
+  {id:12,username:"quyue",   realName:"屈越",phone:"138****6621",email:"quyue1@sinotrans.com",status:"ENABLED",
+   roles:["SYS_ADMIN","GROUP_TAG_ADMIN"],orgs:[{id:10,primary:true},{id:100}],lastLogin:"2026-10-15 09:41"},
+  {id:13,username:"liyuan",  realName:"李媛",phone:"139****8834",email:"liyuan@sinotrans.com",status:"ENABLED",
+   roles:["ORG_TAG_ADMIN"],orgs:[{id:101,primary:true}],lastLogin:"2026-10-15 09:12"},
+  {id:14,username:"wangqiang",realName:"王强",phone:"137****2210",email:"wangqiang@sinotrans.com",status:"LOCKED",
+   roles:["ORG_TAG_ADMIN"],orgs:[{id:100,primary:true}],lastLogin:"2026-10-14 18:05",failCount:5,lockedUntil:"2026-10-15 10:30"},
+  {id:15,username:"zhaolei", realName:"赵磊",phone:"135****7788",email:"zhaolei@sinotrans.com",status:"ENABLED",
+   roles:["GROUP_TAG_ADMIN"],orgs:[{id:10,primary:true}],lastLogin:"2026-10-15 08:50"},
+  {id:16,username:"sunli",   realName:"孙丽",phone:"186****0099",email:"sunli@sinotrans.com",status:"DISABLED",
+   roles:["READONLY"],orgs:[{id:102,primary:true}],lastLogin:"2026-09-28 15:20"}
+];
+const USER_STATUS={ENABLED:["启用","status-tag--success"],DISABLED:["停用","status-tag--gray"],LOCKED:["已锁定","status-tag--danger"]};
+
+/* 会话上下文（模拟 GET /api/auth/me）：演示视角切换用于验证功能权限矩阵 */
+const SESSION={user:"屈越",username:"quyue",roleCode:"SYS_ADMIN",orgId:MY_ORG_ID,mustChange:false};
+function sessionRole(){return ROLES.find(r=>r.code===SESSION.roleCode);}
+function sessionPerms(){return sessionRole().perms;}
+function hasPerm(p){return sessionPerms().includes(p);}
+
+/* —— 组织树 —— */
+const orgExpanded=new Set([1,10,100]);
+let orgSelected=MY_ORG_ID;
+const orgChildren=id=>ORGS.filter(o=>o.parent===id);
+function renderOrgTree(){
+  const box=$("#orgTree");if(!box)return;
+  const visible=ORGS.filter(isReadable);
+  const build=id=>{
+    const kids=orgChildren(id).filter(isReadable);
+    if(!kids.length)return "";
+    return `<div class="org-children">${kids.map(o=>nodeHTML(o,build(o.id))).join("")}</div>`;
+  };
+  const roots=visible.filter(o=>o.parent===null||!isReadable(ORGS.find(p=>p.id===o.parent)));
+  box.innerHTML=roots.map(o=>nodeHTML(o,build(o.id))).join("")||emptyState("可读集合内没有组织单位");
+  box.querySelectorAll("[data-org]").forEach(row=>{
+    row.onclick=e=>{
+      if(e.target.closest("[data-orgtoggle]"))return;
+      orgSelected=+row.dataset.org;renderOrgTree();renderOrgDetail();
+    };
+  });
+  box.querySelectorAll("[data-orgtoggle]").forEach(t=>t.onclick=e=>{
+    e.stopPropagation();const id=+t.dataset.orgtoggle;
+    orgExpanded.has(id)?orgExpanded.delete(id):orgExpanded.add(id);
+    renderOrgTree();
+  });
+}
+function nodeHTML(o,kidsHtml){
+  const hasKids=orgChildren(o.id).filter(isReadable).length>0;
+  const cls=["org-node__row"];
+  if(o.id===orgSelected)cls.push("is-selected");
+  if(isWritable(o))cls.push("is-writable");
+  if(isAncestor(o))cls.push("is-ancestor");
+  return `<div class="org-node">
+    <div class="${cls.join(" ")}" data-org="${o.id}" role="treeitem" tabindex="0">
+      <span class="org-toggle ${hasKids?"":"is-leaf"} ${orgExpanded.has(o.id)?"is-open":""}" data-orgtoggle="${o.id}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="m6 4 4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="org-node__name">${esc(o.name)}</span>
+      <span class="org-node__tag">${ORG_TYPES[o.type]}</span>
+      ${isAncestor(o)?'<span class="status-tag status-tag--warning" style="height:20px;">只读</span>':""}
+      ${o.status==="DISABLED"?'<span class="status-tag status-tag--gray" style="height:20px;">停用</span>':""}
+    </div>
+    ${hasKids&&orgExpanded.has(o.id)?kidsHtml:""}
+  </div>`;
+}
+function renderOrgDetail(){
+  const box=$("#orgDetail");if(!box)return;
+  const o=ORGS.find(x=>x.id===orgSelected);if(!o){box.innerHTML="";return;}
+  const resCount=RESOURCES.filter(r=>r.org===o.name||(o.type==="COMPANY"&&r.org==="华中区域公司")).length;
+  const tagCount=TAGS.filter(t=>t.org===o.name).length;
+  const writable=isWritable(o),self=o.id===MY_ORG_ID,anc=isAncestor(o);
+  const canWrite=hasPerm("org:manage")&&writable;
+  const kids=orgChildren(o.id);
+  box.innerHTML=`
+    <div class="block__title">单位详情 <span class="sub">共 ${kids.length} 个直接下级</span></div>
+    <dl class="kv-list">
+      <dt>单位名称</dt><dd>${esc(o.name)} ${self?'<span class="status-tag" style="height:20px;">当前单位</span>':""}</dd>
+      <dt>单位编码</dt><dd><code>${esc(o.code)}</code></dd>
+      <dt>单位类型</dt><dd>${ORG_TYPES[o.type]}（${o.type}）</dd>
+      <dt>物化路径</dt><dd><code>${esc(o.path)}</code> <span style="font-size:12px;color:var(--text-caption);">parent_id = ${o.parent??"NULL"}</span></dd>
+      <dt>状态</dt><dd>${o.status==="ENABLED"?'<span class="status-tag status-tag--success">启用</span>':'<span class="status-tag status-tag--gray">停用</span>'}</dd>
+      <dt>资源 / 标签</dt><dd>${resCount} 个资源 · ${tagCount} 个标签（发布单位）</dd>
+      <dt>数据权限</dt><dd>${self?'<b style="color:var(--primary);">自身单位</b>：可读写本单位及下级':anc?'<b style="color:var(--warning);">祖先链</b>：只读可见，不可写（子单位不能改上级资源）':writable?'<b style="color:var(--primary);">可写子树</b>：org_path LIKE \''+MY_PATH+'%\'' :'不在可读集合内'}</dd>
+    </dl>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" data-act="orgNew" ${canWrite?"":"disabled"}>＋ 新增下级单位</button>
+      <button class="btn btn-default btn-sm" data-act="orgEdit" ${hasPerm("org:manage")?"":"disabled"}>编辑</button>
+      <button class="btn btn-default btn-sm" data-act="orgMove" ${canWrite?"":"disabled"}>移动到…</button>
+      <button class="btn btn-danger btn-sm" data-act="orgDisable" ${canWrite&&!self?"":"disabled"}>停用</button>
+    </div>
+    <div class="section-h">直接下级${kids.length?"":"（空态）"}</div>
+    ${kids.length?`<div class="table-scroll"><table class="data-table"><thead><tr><th class="data-table__cell">单位</th><th class="data-table__cell">类型</th><th class="data-table__cell">路径</th></tr></thead>
+      <tbody>${kids.map(k=>`<tr><td class="data-table__cell"><span class="data-table__content">${esc(k.name)}</span></td><td class="data-table__cell">${ORG_TYPES[k.type]}</td><td class="data-table__cell"><code>${esc(k.path)}</code></td></tr>`).join("")}</tbody></table></div>`
+      :`<div class="empty-state" style="padding:20px;"><p>该单位下暂无下级单位</p>${canWrite?'<button class="btn btn-primary is-plain btn-sm" data-act="orgNew">新增下级单位</button>':""}</div>`}
+    ${!hasPerm("org:manage")?'<div class="match-callout" style="margin-top:12px;">'+svg.warn+'<div>当前视角缺少 <code>org:manage</code>，组织维护操作已禁用（功能权限按角色收敛，按钮级生效）。</div></div>':""}`;
+}
+function orgMoveDialog(){
+  const o=ORGS.find(x=>x.id===orgSelected);
+  const cands=ORGS.filter(x=>x.id!==o.id&&(x.type!=="DEPARTMENT"));
+  openModal({title:"移动组织节点 — "+o.name,body:`
+    <div class="form-item"><label>移动到（新上级单位）</label>
+      <select class="select" id="orgMoveTarget">${cands.map(c=>`<option value="${c.id}">${esc(c.name)}（${c.path}）</option>`).join("")}</select>
+      <span class="hint">移动会重写该子树的 org_path（写放大）· 组织变更触发 DataScope 缓存失效广播</span></div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">约束：不允许把单位挂到自己的子孙节点下，否则组织树成环、路径前缀扫描失效。</p>`,
+    foot:[{label:"取消"},{label:"确认移动",cls:"btn-primary",onClick:m=>{
+      const tid=+m.querySelector("#orgMoveTarget").value;
+      const target=ORGS.find(x=>x.id===tid);
+      if(target.path.startsWith(o.path)){m.remove();
+        toast(`移动被拒绝：不能把「${o.name}」挂到自己的下级「${target.name}」下（会造成组织树成环）`,"danger");return;}
+      const oldPath=o.path;
+      o.parent=tid;o.path=target.path+o.id+"/";
+      ORGS.forEach(x=>{if(x.path.startsWith(oldPath)&&x.id!==o.id)x.path=x.path.replace(oldPath,o.path);});
+      m.remove();renderOrgTree();renderOrgDetail();
+      toast(`已移动「${o.name}」到「${target.name}」· 子树 org_path 已重写，缓存失效已广播`,"success");
+      addAudit("移动组织节点",o.name,`${oldPath} → ${o.path}`);
+    }}]});
+}
+function orgNewDialog(){
+  const parent=ORGS.find(x=>x.id===orgSelected);
+  openModal({title:"新增下级单位（上级："+parent.name+"）",body:`
+    <div class="form-grid">
+      <div class="form-item"><label>单位编码 <span class="req">*</span></label><input class="input" id="ofCode" placeholder="如 HD-XY"></div>
+      <div class="form-item"><label>单位名称 <span class="req">*</span></label><input class="input" id="ofName" placeholder="如 襄阳分公司"><span class="err">请输入单位名称</span></div>
+      <div class="form-item"><label>单位类型</label><select class="select" id="ofType"><option value="BRANCH">分公司</option><option value="DEPARTMENT">部门</option><option value="COMPANY">区域公司</option></select></div>
+      <div class="form-item"><label>排序号</label><input class="input" type="number" value="0"></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">新建后 <code>org_path</code> 自动生成为 <code>${esc(parent.path)}&lt;新ID&gt;/</code>；数据范围随之扩展（可写子树自动纳入）。</p>`,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+      const name=m.querySelector("#ofName").value.trim();
+      m.querySelector("#ofName").closest(".form-item").classList.toggle("has-error",!name);
+      if(!name)return;
+      const id=2000+ORGS.length;
+      ORGS.push({id,parent:parent.id,code:m.querySelector("#ofCode").value.trim()||"NEW-"+id,name,type:m.querySelector("#ofType").value,path:parent.path+id+"/",status:"ENABLED"});
+      orgExpanded.add(parent.id);orgSelected=id;m.remove();renderOrgTree();renderOrgDetail();
+      toast("单位已创建 · 物化路径已生成，数据范围同步扩展","success");addAudit("新增组织单位",name,parent.path+id+"/");
+    }}]});
+}
+
+/* —— 角色与权限 —— */
+let roleSelected="SYS_ADMIN";
+function renderRoles(){
+  const tb=$("#roleTbody");if(!tb)return;
+  tb.innerHTML=ROLES.map(r=>{
+    const users=USERS.filter(u=>u.roles.includes(r.code)).length;
+    return `<tr style="cursor:pointer;" data-role="${r.code}">
+      <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;">${esc(r.name)}</span></td>
+      <td class="data-table__cell"><code>${esc(r.code)}</code></td>
+      <td class="data-table__cell"><span class="data-table__content">${r.perms.length} / ${ALL_PERMS.length}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${esc(r.scope)}</span></td>
+      <td class="data-table__cell">${users}</td>
+      <td class="data-table__cell">${r.builtin?'<span class="status-tag">内置</span>':'<span class="status-tag status-tag--warning">自定义</span>'}</td>
+      <td class="data-table__cell"><button class="link-btn" data-roleview="${r.code}">配置权限</button>${r.builtin?"":'<button class="link-btn danger">删除</button>'}</td>
+    </tr>`;
+  }).join("");
+  tb.querySelectorAll("[data-roleview]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();roleSelected=b.dataset.roleview;renderRoles();renderPermMatrix();
+    const r=ROLES.find(x=>x.code===roleSelected);
+    toast(`已切换到「${r.name}」的权限配置`,"info");
+  });
+  tb.querySelectorAll("tr").forEach(tr=>tr.onclick=()=>{roleSelected=tr.dataset.role;renderRoles();renderPermMatrix();});
+}
+function renderPermMatrix(){
+  const box=$("#permMatrix");if(!box)return;
+  const r=ROLES.find(x=>x.code===roleSelected)||ROLES[0];
+  const editable=hasPerm("org:manage")&&!r.builtin;
+  $("#permTitle").innerHTML=`权限配置 — ${esc(r.name)} <span class="sub">${r.builtin?"内置角色：权限组合由规格固定，不可修改":"自定义角色：可勾选调整"}</span>`;
+  box.innerHTML=PERM_GROUPS.map(g=>`
+    <div class="perm-group">
+      <div class="perm-group__title">${g.title} <span style="font-weight:400;font-size:12px;color:var(--text-caption);">${g.codes.filter(c=>r.perms.includes(c.c)).length} / ${g.codes.length}</span></div>
+      <div class="perm-grid">
+        ${g.codes.map(c=>{
+          const on=r.perms.includes(c.c);
+          const locked=r.builtin||!hasPerm("org:manage");
+          return `<div class="perm-item ${on?"is-on":""} ${locked?"is-locked":""}" data-perm="${c.c}">
+            <span class="box">${on?"✓":""}</span>
+            <span><b style="font-weight:500;">${c.name}</b><code>${c.c} · 数据范围：${c.scope}</code></span>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`).join("")+
+    `<div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-primary" data-act="permSave" ${editable?"":"disabled"}>保存权限</button>
+      <span style="font-size:12px;color:var(--text-caption);">${r.builtin?"内置角色不可编辑；如需调整请复制为自定义角色":editable?"改动将在保存后即时影响持有该角色的用户":"当前视角缺少 org:manage，只读查看"}</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">
+      <b>audit:view 默认只给系统管理员</b>：审计日志记录"谁改了什么"，不给单位标签管理员是为了避免横向窥探。但<b>所有角色都能看自己的操作记录</b>（<code>GET /api/operation-logs/mine</code> 只需登录）——自查不需要额外授权。
+    </p>`;
+  box.querySelectorAll(".perm-item").forEach(it=>it.onclick=()=>{
+    const c=it.dataset.perm;
+    if(r.builtin){toast("内置角色的权限组合由规格固定，不可修改（可复制为自定义角色）","warning");return;}
+    if(!hasPerm("org:manage")){toast("权限不足：需要 org:manage","danger");return;}
+    const i=r.perms.indexOf(c);
+    if(i>=0)r.perms.splice(i,1);else r.perms.push(c);
+    renderPermMatrix();renderRoles();
+  });
+}
+function renderPermDict(){
+  const tb=$("#permDictTbody");if(!tb)return;
+  tb.innerHTML=PERM_GROUPS.flatMap(g=>g.codes).map(c=>{
+    const holders=ROLES.filter(r=>r.perms.includes(c.c)).map(r=>r.name).join("、")||"—";
+    return `<tr><td class="data-table__cell"><code>${c.c}</code></td><td class="data-table__cell"><span class="data-table__content">${c.name}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${c.scope}</span></td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${holders}</span></td></tr>`;
+  }).join("");
+}
+
+/* —— 用户管理 —— */
+function renderUsers(list){
+  const tb=$("#userTbody");if(!tb)return;
+  const data=list||USERS;
+  if(!data.length){
+    tb.innerHTML=`<tr><td class="data-table__cell" colspan="8">${emptyState("没有符合条件的用户——试试放宽筛选条件")}</td></tr>`;return;
+  }
+  tb.innerHTML=data.map(u=>{
+    const [st,cls]=USER_STATUS[u.status];
+    const roleNames=u.roles.map(c=>(ROLES.find(r=>r.code===c)||{}).name||c).join("、");
+    const orgNames=u.orgs.map(o=>{const org=ORGS.find(x=>x.id===o.id);return esc(org?org.name:o.id)+(o.primary?' <span class="status-tag" style="height:18px;">主</span>':"");}).join("、");
+    const can=hasPerm("org:manage");
+    return `<tr>
+      <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;">${esc(u.username)}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${esc(u.realName)}</span>${u.mustChange?' <span class="status-tag status-tag--warning" style="height:18px;">待改密</span>':""}</td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${esc(roleNames)}</span></td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${orgNames}</span></td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${esc(u.phone||"—")}<br>${esc(u.email||"—")}</span></td>
+      <td class="data-table__cell"><span class="status-tag ${cls}">${st}</span>${u.status==="LOCKED"?`<br><span style="font-size:11px;color:var(--text-caption);">失败 ${u.failCount} 次 · 锁定至 ${esc(u.lockedUntil)}</span>`:""}</td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-size:12px;">${esc(u.lastLogin||"—")}</span></td>
+      <td class="data-table__cell" style="white-space:nowrap;">
+        <button class="link-btn" data-user="${u.id}" data-act="userEdit" ${can?"":"disabled"}>编辑</button>
+        <button class="link-btn" data-user="${u.id}" data-act="userReset" ${can?"":"disabled"}>重置口令</button>
+        ${u.status==="LOCKED"?`<button class="link-btn" data-user="${u.id}" data-act="userUnlock" ${can?"":"disabled"}>解锁</button>`:""}
+        <button class="link-btn ${u.status==="ENABLED"?"danger":""}" data-user="${u.id}" data-act="userToggle" ${can?"":"disabled"}>${u.status==="ENABLED"?"停用":"启用"}</button>
+      </td></tr>`;
+  }).join("");
+}
+function userFormModal(u){
+  const isNew=!u;
+  const body=document.createElement("div");
+  body.innerHTML=`
+    <div class="form-grid">
+      <div class="form-item"><label>用户名 <span class="req">*</span></label><input class="input" id="ufUsername" value="${u?esc(u.username):""}" placeholder="登录名，唯一" ${isNew?"":"disabled"}><span class="err">请输入用户名</span></div>
+      <div class="form-item"><label>姓名 <span class="req">*</span></label><input class="input" id="ufReal" value="${u?esc(u.realName):""}"><span class="err">请输入姓名</span></div>
+      ${isNew?`<div class="form-item form-item--full"><label>初始口令 <span class="req">*</span></label><input class="input" id="ufPwd" placeholder="8 位以上，含大小写与数字" value=""><span class="err" id="ufPwdErr">口令需 8 位以上且同时包含大小写字母与数字（错误码 10001）</span><span class="hint">创建后要求首次登录修改口令（must_change_password）</span></div>`:""}
+      <div class="form-item"><label>手机号</label><input class="input" id="ufPhone" value="${u?esc(u.phone||""):""}"></div>
+      <div class="form-item"><label>邮箱</label><input class="input" id="ufEmail" value="${u?esc(u.email||""):""}"></div>
+      <div class="form-item form-item--full"><label>角色（可多选）</label>
+        <div class="checkbox-group" id="ufRoles">${ROLES.map(r=>`<span class="check-chip${u&&u.roles.includes(r.code)?" is-on":""}" data-v="${r.code}">${esc(r.name)}</span>`).join("")}</div></div>
+      <div class="form-item form-item--full"><label>所属单位（可多选，点「主」设为主单位）</label>
+        <div class="checkbox-group" id="ufOrgs">${ORGS.filter(o=>o.type!=="GROUP").map(o=>{
+          const cur=u?u.orgs.find(x=>x.id===o.id):null;
+          return `<span class="check-chip${cur?" is-on":""}" data-v="${o.id}" data-primary="${cur&&cur.primary?"1":""}">${esc(o.name)}${cur&&cur.primary?' <b style="color:var(--primary);">主</b>':""}</span>`;
+        }).join("")}</div>
+        <span class="hint">主单位决定登录后的默认数据范围；切换单位由服务端校验归属（不信任入参）</span></div>
+    </div>`;
+  body.querySelectorAll("#ufRoles .check-chip,#ufOrgs .check-chip").forEach(ch=>{
+    ch.onclick=()=>{
+      if(ch.parentElement.id==="ufOrgs"&&ch.classList.contains("is-on")){
+        /* 已选中的单位：点击切换主单位标记 */
+        ch.parentElement.querySelectorAll(".check-chip").forEach(o=>{o.dataset.primary="";});
+        ch.dataset.primary="1";
+      }else if(ch.parentElement.id==="ufOrgs"){
+        ch.classList.toggle("is-on");
+        if(ch.classList.contains("is-on")&&!ch.parentElement.querySelector('[data-primary="1"]'))ch.dataset.primary="1";
+      }else ch.classList.toggle("is-on");
+      if(ch.parentElement.id==="ufOrgs"){
+        ch.parentElement.querySelectorAll(".check-chip").forEach(o=>{
+          const base=o.textContent.replace(" 主","").trim();
+          o.innerHTML=esc(base)+(o.dataset.primary==="1"?' <b style="color:var(--primary);">主</b>':"");
+        });
+      }
+    };
+  });
+  openModal({title:isNew?"新建用户":"编辑用户 — "+u.realName,body,lg:true,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+      const uname=m.querySelector("#ufUsername").value.trim();
+      const real=m.querySelector("#ufReal").value.trim();
+      let ok=true;
+      m.querySelector("#ufUsername").closest(".form-item").classList.toggle("has-error",!uname);ok&&=!!uname;
+      m.querySelector("#ufReal").closest(".form-item").classList.toggle("has-error",!real);ok&&=!!real;
+      if(isNew){
+        const pwd=m.querySelector("#ufPwd").value;
+        const strong=pwd.length>=8&&/[a-z]/.test(pwd)&&/[A-Z]/.test(pwd)&&/\d/.test(pwd);
+        m.querySelector("#ufPwdErr").closest(".form-item").classList.toggle("has-error",!strong);
+        if(!strong){toast("口令不合规：需 8 位以上且含大小写与数字（错误码 10001）","danger");return;}
+        ok&&=strong;
+      }
+      if(!ok)return;
+      const roles=[...m.querySelectorAll("#ufRoles .is-on")].map(c=>c.dataset.v);
+      const orgs=[...m.querySelectorAll("#ufOrgs .is-on")].map(c=>({id:+c.dataset.v,primary:c.dataset.primary==="1"}));
+      if(!roles.length){toast("至少分配一个角色——否则用户登录后无任何功能权限","warning");return;}
+      if(!orgs.length){toast("至少分配一个单位——数据范围需要一个基准单位","warning");return;}
+      if(isNew){
+        USERS.push({id:100+USERS.length,username:uname,realName:real,phone:m.querySelector("#ufPhone").value.trim(),email:m.querySelector("#ufEmail").value.trim(),status:"ENABLED",roles,orgs,mustChange:true,lastLogin:"—"});
+        toast("用户已创建 · 初始口令已设置，首次登录须改密","success");
+      }else{
+        u.realName=real;u.phone=m.querySelector("#ufPhone").value.trim();u.email=m.querySelector("#ufEmail").value.trim();u.roles=roles;u.orgs=orgs;
+        toast("用户已保存","success");
+      }
+      m.remove();renderUsers();renderRoles();addAudit(isNew?"新建用户":"修改用户",uname,roles.join("、"));
+    }}]});
+}
+function resetPassword(u){
+  const tmp="Sn@"+Math.random().toString(36).slice(2,8)+"A1";
+  openModal({title:"重置口令 — "+u.realName,body:`
+    <div class="match-callout">${svg.warn}<div>重置后将生成<b>一次性临时口令</b>，并置 <code>must_change_password = TRUE</code>，用户下次登录必须修改。该动作记入审计。</div></div>
+    <dl class="kv-list" style="margin-top:14px;">
+      <dt>用户名</dt><dd><code>${esc(u.username)}</code></dd>
+      <dt>临时口令</dt><dd><code style="font-size:15px;color:var(--primary);">${esc(tmp)}</code></dd>
+      <dt>口令策略</dt><dd>8 位以上且含大小写与数字（不合规返回 10001）</dd>
+    </dl>`,
+    foot:[{label:"取消"},{label:"确认重置",cls:"btn-primary",onClick:m=>{
+      u.mustChange=true;m.remove();renderUsers();toast("口令已重置，请通过安全渠道转交临时口令","success");
+      addAudit("重置口令",u.username,"must_change_password=TRUE");}}]});
+}
+/* 修改口令（API §2.5）：口令策略前端先校验，不合规提示 10001 */
+function passwordModal(){
+  openModal({title:"修改口令",body:`
+    <div class="form-grid">
+      <div class="form-item form-item--full"><label>原口令 <span class="req">*</span></label><input class="input" type="password" id="pwOld" value="Quyue@2026"></div>
+      <div class="form-item"><label>新口令 <span class="req">*</span></label><input class="input" type="password" id="pwNew" placeholder="8 位以上，含大小写与数字"><span class="err" id="pwErr">口令需 8 位以上且同时包含大小写字母与数字（错误码 10001）</span></div>
+      <div class="form-item"><label>确认新口令 <span class="req">*</span></label><input class="input" type="password" id="pwNew2"></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">PUT <code>/api/auth/password</code>：只校验当前登录用户自己的口令，不涉及他人（无 <code>org:manage</code> 也可用）。</p>`,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+      const n=m.querySelector("#pwNew").value,c=m.querySelector("#pwNew2").value;
+      const strong=n.length>=8&&/[a-z]/.test(n)&&/[A-Z]/.test(n)&&/\d/.test(n);
+      m.querySelector("#pwErr").closest(".form-item").classList.toggle("has-error",!strong);
+      if(!strong){toast("口令不合规：8 位以上且含大小写与数字（10001）","danger");return;}
+      if(n!==c){toast("两次输入的新口令不一致","danger");return;}
+      m.remove();toast("口令已修改","success");addAudit("修改口令",SESSION.username,"—");
+    }}]});
+}
+
+/* —— 会话上下文与演示视角 —— */
+const VIEW_LABEL={SYS_ADMIN:"系统管理员",GROUP_TAG_ADMIN:"集团标签管理员",ORG_TAG_ADMIN:"单位标签管理员",READONLY:"只读查询"};
+function renderSessionMenu(){
+  const m=$("#userMenu");if(!m)return;
+  const r=sessionRole();
+  const tu=$("#topbarUser");if(tu)tu.textContent=`${SESSION.user} · ${r.name}`;
+  const readable=ORGS.filter(isReadable).map(o=>o.id);
+  m.innerHTML=`
+    <div class="user-menu__role">会话上下文（GET /api/auth/me）</div>
+    <div style="padding:8px 16px 10px;">
+      <dl class="session-kv">
+        <dt>用户</dt><dd>${esc(SESSION.user)}（${esc(SESSION.username)}）</dd>
+        <dt>角色</dt><dd>${esc(r.name)}${USERS.find(u=>u.username===SESSION.username)&&USERS.find(u=>u.username===SESSION.username).roles.length>1?" 等 "+USERS.find(u=>u.username===SESSION.username).roles.length+" 个":""}</dd>
+        <dt>当前单位</dt><dd>${esc(ORGS.find(o=>o.id===SESSION.orgId).name)}</dd>
+        <dt>可写子树</dt><dd><code>${esc(MY_PATH)}</code></dd>
+        <dt>可读组织</dt><dd>${readable.length} 个（子树 ∪ 祖先链）</dd>
+        <dt>权限码</dt><dd style="max-height:88px;overflow:auto;">${sessionPerms().map(p=>`<span class="code-chip">${p}</span>`).join("")}</dd>
+      </dl>
+    </div>
+    <div class="user-menu__role" style="border-top:1px solid var(--border-light);">演示视角（验证功能权限矩阵）</div>
+    ${Object.entries(VIEW_LABEL).map(([code,label])=>`<div class="user-menu__item ${code===SESSION.roleCode?"is-current":""}" data-view="${code}">${label}${code===SESSION.roleCode?" ✓":""}</div>`).join("")}
+    <div class="user-menu__role" style="border-top:1px solid var(--border-light);">切换当前单位</div>
+    ${USERS.find(u=>u.username===SESSION.username).orgs.map(o=>{const org=ORGS.find(x=>x.id===o.id);
+      return `<div class="user-menu__item ${org.id===SESSION.orgId?"is-current":""}" data-switchorg="${org.id}">${esc(org.name)}${o.primary?"（主）":""}${org.id===SESSION.orgId?" ✓":""}</div>`;}).join("")}
+    <div class="user-menu__item" data-act="pwdChange" style="border-top:1px solid var(--border-light);">修改口令</div>
+    <div class="user-menu__item" style="color:var(--danger);">退出登录</div>`;
+  m.querySelectorAll("[data-view]").forEach(it=>it.onclick=e=>{
+    e.stopPropagation();SESSION.roleCode=it.dataset.view;m.hidden=true;
+    renderSessionMenu();applyPermissionUI();renderOrgTree();renderOrgDetail();renderRoles();renderPermMatrix();renderUsers();
+    const r2=sessionRole();
+    toast(`已切换到「${r2.name}」视角 · 权限码 ${r2.perms.length}/${ALL_PERMS.length} · 数据范围 ${r2.scope}`,r2.code==="SYS_ADMIN"?"success":"info");
+  });
+  m.querySelectorAll("[data-switchorg]").forEach(it=>it.onclick=e=>{
+    e.stopPropagation();const id=+it.dataset.switchorg;m.hidden=true;
+    /* 服务端校验归属：不在该用户单位列表内 → 20004 */
+    const mine=USERS.find(u=>u.username===SESSION.username).orgs.map(o=>o.id);
+    if(!mine.includes(id)){toast("切换失败：该单位不在你的单位列表内（错误码 20004，服务端校验归属，不信任入参）","danger");return;}
+    SESSION.orgId=id;renderSessionMenu();applyPermissionUI();
+    toast(`已切换当前单位到「${ORGS.find(o=>o.id===id).name}」· 会话上下文已刷新（含 orgScope 缓存）`,"success");
+  });
+  const pc=m.querySelector('[data-act="pwdChange"]');
+  if(pc)pc.onclick=e=>{e.stopPropagation();m.hidden=true;passwordModal();};
+}
+/* 功能权限 → 按钮级生效：按 data-act 映射所需权限码 */
+const PERM_OF_ACT={
+  resNew:"resource:create",resImport:"resource:import",resEdit:"resource:update",
+  tagNew:"tag:create",tagEdit:"tag:update",tagRule:"tag:update",tagPublish:"tag:publish",tagDisable:"tag:publish",
+  matchRun:"match:run",attrNew:"metadata:manage",typeNew:"metadata:manage",
+  aiRuleDraft:"ai:use",aiTagRecommend:"ai:use",aiStatus:"ai:use",
+  orgNew:"org:manage",orgMove:"org:manage",orgEdit:"org:manage",orgDisable:"org:manage",
+  permSave:"org:manage",roleNew:"org:manage",userNew:"org:manage"
+};
+function applyPermissionUI(){
+  document.querySelectorAll("[data-act]").forEach(b=>{
+    const need=PERM_OF_ACT[b.dataset.act];
+    if(!need)return;
+    if(!hasPerm(need)){b.setAttribute("disabled","disabled");b.setAttribute("title","权限不足：需要 "+need);}
+    else if(!b.dataset.permLocked){b.removeAttribute("disabled");b.removeAttribute("title");}
+  });
+  /* 页面级守卫：组织/用户/角色需 org:manage；审计需 audit:view（但"我的操作记录"人人可用） */
+  const guards=[["page-org-tree","org:manage"],["page-role-permission","org:manage"],["page-user-list","org:manage"],["page-audit-log","audit:view"]];
+  guards.forEach(([pid,perm])=>{
+    const page=document.getElementById(pid);if(!page)return;
+    let g=page.querySelector(".perm-guard");
+    if(!hasPerm(perm)){
+      if(!g){g=document.createElement("div");g.className="perm-guard block";page.insertBefore(g,page.firstChild);}
+      g.innerHTML=`<div class="match-callout">${svg.warn}<div>当前视角为「${esc(sessionRole().name)}」，缺少 <code>${perm}</code>，本页只读且写操作已禁用。${perm==="audit:view"?'<br>审计日志默认只给系统管理员，避免成为横向窥探通道；但<b>你自己的操作记录始终可查</b>（<code>GET /api/operation-logs/mine</code> 只需登录）。 <button class="link-btn" data-act="myLogs">查看我的操作记录</button>':""}</div></div>`;
+    }else if(g)g.remove();
+  });
+}
+
+
 /* ================= 审计 ================= */
 function addAudit(action,obj,note){
   /* 原型演示：审计写入以 toast 提示代替 */
@@ -1855,6 +2441,56 @@ document.addEventListener("click",e=>{
     foot:[{label:"关闭"},{label:"去修改规则",cls:"btn-primary",onClick:m=>{m.remove();switchTab("rule-config");}}]});
   else if(a==="qResGo")queryByRes();
   else if(a==="qTagGo")queryByTag();
+  else if(a==="orgNew")orgNewDialog();
+  else if(a==="orgMove")orgMoveDialog();
+  else if(a==="orgEdit")toast("编辑单位（原型示意）· 改上级请用「移动到…」","info");
+  else if(a==="orgDisable"){const o=ORGS.find(x=>x.id===orgSelected);
+    confirmDialog({title:"停用组织单位",danger:true,okLabel:"确认停用",
+      html:`停用 <b>${esc(o.name)}</b> 后：<br>1. 该单位及其子树的资源将不再参与新的打标匹配；<br>2. 持有该单位为主单位的用户需重新分配单位；<br>3. 组织变更会触发 <code>DataScope</code> 缓存失效广播。<br><span style="font-size:13px;color:var(--text-caption);">存在在用资源时服务端会拒绝（先迁移或停用资源）。</span>`,
+      onOk:()=>{o.status="DISABLED";renderOrgTree();renderOrgDetail();toast("单位已停用","success");addAudit("停用组织单位",o.name,"—");}});}
+  else if(a==="roleNew")openModal({title:"新建角色",body:`
+    <div class="form-grid">
+      <div class="form-item"><label>角色编码 <span class="req">*</span></label><input class="input" placeholder="如 WH_LEAD"></div>
+      <div class="form-item"><label>角色名称 <span class="req">*</span></label><input class="input" placeholder="如 仓储主管"></div>
+      <div class="form-item form-item--full"><label>备注</label><input class="input" placeholder="选填"></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">新建后到下方权限矩阵勾选权限码；<code>audit:view</code> 建议只授予需要审计职责的角色。</p>`,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+      const name=m.querySelectorAll(".input")[1].value.trim();
+      if(!name){toast("请输入角色名称","warning");return;}
+      ROLES.push({code:"ROLE_"+ROLES.length,name,builtin:false,scope:"可写子树",perms:["metadata:view","resource:view","tag:view","report:view"]});
+      roleSelected=ROLES[ROLES.length-1].code;m.remove();renderRoles();renderPermMatrix();renderPermDict();
+      toast("角色已创建（默认仅查看类权限，请按需勾选）","success");}}]});
+  else if(a==="permSave"){const r=ROLES.find(x=>x.code===roleSelected);
+    addAudit("修改角色权限",r.name,r.perms.length+" 个权限码");
+    toast(`「${r.name}」权限已保存 · ${r.perms.length}/${ALL_PERMS.length} 个权限码生效`,"success");}
+  else if(a==="userNew")userFormModal(null);
+  else if(a==="userEdit"){const u=USERS.find(x=>x.id===+act.dataset.user);u&&userFormModal(u);}
+  else if(a==="userReset"){const u=USERS.find(x=>x.id===+act.dataset.user);u&&resetPassword(u);}
+  else if(a==="userUnlock"){const u=USERS.find(x=>x.id===+act.dataset.user);
+    u.status="ENABLED";u.failCount=0;u.lockedUntil=null;renderUsers();
+    toast(`已解锁「${u.realName}」· 登录失败计数已重置`,"success");addAudit("解锁用户",u.username,"—");}
+  else if(a==="userToggle"){const u=USERS.find(x=>x.id===+act.dataset.user);
+    if(u.status==="ENABLED"){
+      confirmDialog({title:"停用用户",danger:true,okLabel:"确认停用",
+        html:`停用后 <b>${esc(u.realName)}</b> 无法登录，其历史操作记录仍可追溯（审计冗余存用户名，不依赖用户当前状态）。`,
+        onOk:()=>{u.status="DISABLED";renderUsers();toast("用户已停用","success");addAudit("停用用户",u.username,"—");}});
+    }else{u.status="ENABLED";renderUsers();toast("用户已启用","success");addAudit("启用用户",u.username,"—");}}
+  else if(a==="userSearch"){
+    const kw=$("#userKw").value.trim(),rf=$("#userRoleFilter").value,sf=$("#userStatusFilter").value;
+    const list=USERS.filter(u=>(!kw||u.username.includes(kw)||u.realName.includes(kw))
+      &&(!rf||u.roles.includes(rf))&&(!sf||USER_STATUS[u.status][0]===sf));
+    renderUsers(list);toast(`查询完成 · 命中 ${list.length} 个用户`,"info");
+  }
+  else if(a==="myLogs")openModal({title:"我的操作记录（GET /api/operation-logs/mine）",body:`
+    <p style="font-size:12px;color:var(--text-caption);margin-bottom:12px;">只需登录即可访问，<b>不需要 <code>audit:view</code></b>——"我昨天改的那个标签规则还在不在"这类自查无需额外授权。</p>
+    <div class="table-scroll"><table class="data-table" style="min-width:640px;">
+      <thead><tr><th class="data-table__cell">时间</th><th class="data-table__cell">动作</th><th class="data-table__cell">对象</th><th class="data-table__cell">结果</th></tr></thead>
+      <tbody>
+        <tr><td class="data-table__cell">2026-10-15 09:42</td><td class="data-table__cell">发布标签</td><td class="data-table__cell">A级-战略级仓</td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+        <tr><td class="data-table__cell">2026-10-15 09:40</td><td class="data-table__cell">修改规则</td><td class="data-table__cell">冷链仓</td><td class="data-table__cell"><span class="status-tag status-tag--warning">待重算</span></td></tr>
+        <tr><td class="data-table__cell">2026-10-15 09:12</td><td class="data-table__cell">AI 转规则</td><td class="data-table__cell">source=LLM</td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+      </tbody></table></div>`,lg:true,foot:[{label:"关闭",cls:"btn-primary"}]});
 });
 /* 查询中心页内切换 */
 $$("[data-qtab]").forEach(ch=>ch.onclick=()=>{
@@ -1899,8 +2535,22 @@ renderTags();
 renderDashTags();
 syncQuerySel();
 loadRuleBuilder();
+renderOrgTree();
+renderOrgDetail();
+renderRoles();
+renderPermMatrix();
+renderPermDict();
+renderUsers();
+renderSessionMenu();
+/* 用户筛选下拉：角色与单位选项 */
+(()=>{
+  const rf=$("#userRoleFilter"),of=$("#userOrgFilter");
+  if(rf)ROLES.forEach(r=>rf.insertAdjacentHTML("beforeend",`<option value="${r.code}">${esc(r.name)}</option>`));
+  if(of)ORGS.filter(o=>o.type!=="GROUP").forEach(o=>of.insertAdjacentHTML("beforeend",`<option value="${o.id}">${esc(o.name)}</option>`));
+})();
 switchTab("dashboard");
 renderTabs();
+applyPermissionUI();
 </script>
 </body>
 </html>
