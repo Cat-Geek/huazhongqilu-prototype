@@ -663,6 +663,7 @@ button{font-family:inherit;}
           </div>
           <div class="filter-bar__actions">
             <button class="btn btn-primary btn-sm" data-act="tagSearch">查询</button>
+            <button class="btn btn-primary is-plain btn-sm" data-act="aiTagRecommend">✦ AI 推荐标签</button>
             <button class="btn btn-primary btn-sm" data-act="tagNew">＋ 新建标签</button>
           </div>
         </div>
@@ -703,17 +704,27 @@ button{font-family:inherit;}
           <div class="ai-box" style="margin-bottom:14px;">
             <div class="ai-box__head">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2 14.5 9 21.5 11.5 14.5 14 12 21 9.5 14 2.5 11.5 9.5 9 12 2Z" fill="var(--primary)"/></svg>
-              AI 自然语言转规则 <span class="ai-badge">服务可用</span>
+              AI 自然语言转规则 <span class="ai-badge" id="aiBadge">服务可用</span>
+              <span style="font-weight:400;font-size:12px;color:var(--text-caption);" id="aiMeta"></span>
             </div>
             <textarea class="input ai-textarea" id="aiText" placeholder="例：把仓库类型是冷链、面积 5000 平米以上，或者权属是自有的仓库找出来">仓库类型是冷链并且面积不小于5000平米，或者权属是自有</textarea>
             <div class="ai-chip-row">
               <span class="ai-chip" data-ai="面积大于等于5000平方米的仓库">示例：面积门槛</span>
               <span class="ai-chip" data-ai="权属是自有或者合作的码头">示例：多值属于</span>
+              <span class="ai-chip" data-ai="吞吐能力超过100万吨的码头">示例：未定义属性（触发校验拒绝+降级）</span>
             </div>
-            <div style="margin-top:10px;display:flex;gap:8px;">
-              <button class="btn btn-primary btn-sm" data-act="aiTransfer">转成规则</button>
-              <button class="btn btn-default btn-sm" data-act="aiDry">仅预览（不写入编辑器）</button>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="btn btn-primary btn-sm" data-act="aiRuleDraft">生成规则草案</button>
+              <button class="btn btn-default btn-sm" data-act="aiStatus">重新检测可用性</button>
+              <label class="check-chip" id="aiSimulate" style="margin-left:auto;">
+                <input type="checkbox" style="margin:0;"> 模拟模型不可用
+              </label>
             </div>
+            <p style="font-size:12px;color:var(--text-caption);margin-top:10px;line-height:1.6;">
+              口径（ADR-0007）：模型只产出<b>结构化候选</b>，须经 <code>RuleValidator</code> 校验后方可落地；
+              模型不可用时自动降级到<b>规则解析器</b>（属性别名表 + 单位表 + 比较词映射），能力不中断。
+              提示词只含属性名与枚举候选值，<b>不含资源明细</b>（ADR-0009）；每用户每分钟 ≤10 次，每次调用记审计。
+            </p>
           </div>
           <div class="rule-builder" id="ruleBuilder"></div>
           <div class="rb-preview" id="rulePreview"></div>
@@ -984,6 +995,7 @@ function switchTab(id){
   $$(".menu-item__child").forEach(c=>c.classList.toggle("is-selected",c.dataset.page===id));
   $$(".menu-item__parent").forEach(p=>p.classList.toggle("is-active",p.dataset.page===id||(p.classList.contains("has-children")&&$$('#grp-'+p.dataset.group+" .menu-item__child.is-selected").length>0)));
   if(id==="dashboard")renderDashTags();
+  if(id==="rule-config")renderAiStatus();
 }
 function closeTab(id){
   const i=tabs.findIndex(t=>t.id===id);if(i<0)return;
@@ -1055,7 +1067,10 @@ function resourceDetail(r){
     <div class="section-h">库房层级</div>
     <div style="font-size:13px;color:var(--text-caption);">${r.type==="仓库"?"下属库房 3 个：1号库（普货区）· 2号库（恒温区）· 3号库（危险品区）":"该资源类型不支持库房层级"}</div>`;
   openModal({title:"资源详情 — "+r.name,body,lg:true,
-    foot:[{label:"人工贴标",cls:"btn-primary is-plain",onClick:()=>{toast("已打开人工贴标（原型示意）","info");}},
+    foot:[{label:"✦ AI 推荐标签",cls:"btn-primary is-plain",onClick:()=>{
+            const q=`${r.type}，仓库类型${r.wType}，面积${r.area}平米，权属${r.own}，${r.status}，适合什么标签`;
+            aiTagRecommend(q);}},
+          {label:"人工贴标",cls:"btn-primary is-plain",onClick:()=>{toast("已打开人工贴标（原型示意）","info");}},
           {label:"关闭",cls:"btn-primary",onClick:m=>m.remove()}]});
 }
 
@@ -1294,7 +1309,7 @@ function treeToText(g){
   return g.children.length>1&&!g.children.some(c=>c.logic)?s:(g.children.some(c=>c.logic)?"("+s+")":s);
 }
 function conditionText(c){
-  const f=FIELDS.find(x=>x.code===c.field)||{name:c.field};
+  const f=FIELDS.find(x=>x.code===c.field)||AI_FIELDS.find(x=>x.code===c.field)||{name:FIELD_NAMES[c.field]||c.field};
   const op=OPS[c.op]||{sym:c.op};
   const vals=c.values.length?c.values.join("、"):"?";
   return `${f.name} ${op.sym} ${vals}`;
@@ -1305,21 +1320,31 @@ function updatePreview(){$("#rulePreview").innerHTML="规则语义预览：<b>"+
 function ruleDryRun(){
   const t=TAGS.find(x=>x.id===$("#ruleTag").value);
   const semantic=treeToText(ruleTree);
+  /* 作用范围先过滤，再逐条真求值——命中数与理由都是算出来的 */
+  const scope=t?t.scope:[];
+  const inScope=RESOURCES.filter(r=>!scope.length||scope.includes(r.type));
+  const hits=inScope.filter(r=>evalTree(ruleTree,r));
+  const miss=inScope.filter(r=>!evalTree(ruleTree,r));
+  const leafCount=leaves(ruleTree).length;
+  const pushable=leaves(ruleTree).every(c=>["ownership","operation_status","resourceType"].includes(c.field));
   const body=document.createElement("div");
+  const row=(r,ok)=>`<div class="sample-item${ok?"":" is-miss"}">
+    <span class="status-tag ${ok?"status-tag--success":"status-tag--gray"}">${ok?"命中":"未命中"}</span>
+    <span class="name">${esc(r.name)}</span>
+    <span class="why">${esc(explainTree(ruleTree,r))}</span></div>`;
   body.innerHTML=`
     <dl class="kv-list" style="margin-bottom:14px;">
-      <dt>试跑标签</dt><dd>${esc(t?t.name:"（未选择）")}</dd>
-      <dt>规则语义</dt><dd style="font-family:Consolas,monospace;">${esc(semantic)}</dd>
-      <dt>执行方式</dt><dd>内存求值（演示）· 不写库 · 扫描作用范围资源 96 个</dd>
+      <dt>试跑标签</dt><dd>${esc(t?t.name:"（未选择）")}${t?` · 作用范围 ${t.scope.join("/")}`:""}</dd>
+      <dt>规则语义</dt><dd style="font-family:Consolas,monospace;">${esc(semantic||"（空）")}</dd>
+      <dt>执行方式</dt><dd>${pushable?'SQL 下推（条件字段均为固定物理列）':'内存求值（含扩展 JSON 字段，无法下推）'} · 不写库</dd>
+      <dt>扫描范围</dt><dd>作用范围内 ${inScope.length} 个资源（演示数据集）· ${leafCount} 个叶子条件</dd>
+      <dt>试跑结果</dt><dd><b style="color:var(--success);">命中 ${hits.length}</b> · 未命中 ${miss.length}</dd>
     </dl>
-    <div class="section-h">命中预览（3 / 96）</div>
-    <div class="sample-list">
-      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">长沙霞凝冷链物流园</span><span class="why">冷链 ✓ · 12,300㎡ ≥ 5,000 ✓</span></div>
-      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">武汉阳逻保税仓储中心</span><span class="why">非冷链 ✗，但权属=自有 ✓（OR 分支命中）</span></div>
-      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">襄阳樊西智能立体仓</span><span class="why">非冷链 ✗，权属=自有 ✓（OR 分支命中）</span></div>
-      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">岳阳城陵矶普货仓库</span><span class="why">普货 ✗ 且面积 3,200 < 5,000 ✗ 且权属=租赁 ✗</span></div>
-      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">宜昌三峡机场附近中转仓</span><span class="why">普货 ✗ · 1,800 < 5,000 ✗ · 合作 ✗</span></div>
-    </div>
+    ${hits.length?`<div class="section-h">命中样本（最多 5 条，含逐条件判定过程）</div>
+      <div class="sample-list">${hits.slice(0,5).map(r=>row(r,true)).join("")}</div>`:
+      `<div class="empty-state"><p>当前规则在作用范围内<b>没有任何命中资源</b>——请检查取值或条件组合，避免"看起来配了规则、实际不命中"的静默故障</p></div>`}
+    ${miss.length?`<div class="section-h">未命中样本（最多 3 条，给出未命中原因）</div>
+      <div class="sample-list">${miss.slice(0,3).map(r=>row(r,false)).join("")}</div>`:""}
     <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">试跑只读不写库；确认无误后保存规则并「重新匹配」才会更新资源-标签关联。</p>`;
   openModal({title:"规则试跑结果",body,lg:true,foot:[
     {label:"继续调整"},
@@ -1440,6 +1465,337 @@ function addAudit(action,obj,note){
   /* 原型演示：审计写入以 toast 提示代替 */
 }
 
+/* ================= AI 能力（API 8.1 / 8.2 / 8.3 + ADR-0007 降级） =================
+   口径：模型只做「自然语言 → 结构化候选」，落地前必须过 RuleValidator；
+   模型不可用/输出不合规时降级到规则解析器（属性别名表 + 单位表 + 比较词映射）。
+   原型用确定性 mock 实现，真模型由后端 LlmClient 提供（密钥仅走环境变量）。 */
+const AI={available:true,primaryMode:"LLM",model:"CM-Pub-DeepSeek-V4-Flash-0731",
+  fallbackAvailable:true,lastCheckAt:"2026-10-15 09:41:00",degradedReason:null};
+
+const AI_FIELDS=[
+  {code:"warehouse_type",names:["仓库类型"],type:"enum",opts:["普货","冷链","危化品","保税","智能"]},
+  {code:"area",names:["面积"],type:"number"},
+  {code:"capacity",names:["容量"],type:"number"},
+  {code:"ownership",names:["权属"],type:"enum",opts:["自有","租赁","合作"]},
+  {code:"operation_status",names:["运营状态","运营情况"],type:"enum",opts:["运营中","建设中","停用"]},
+  {code:"open_date",names:["投用日期","开业日期"],type:"date"}
+];
+const AI_UNKNOWN=["吞吐能力","吞吐量","泊位数量","员工数","月台数","温区"];
+const AI_OPS=[
+  {re:/大于等于|不小于|不少于|>=|≥/,op:"GE"},
+  {re:/小于等于|不大于|不超过|<=|≤/,op:"LE"},
+  {re:/大于|超过|多于|高于|>/,op:"GT"},
+  {re:/小于|低于|少于|</,op:"LT"},
+  {re:/不等于|!=/,op:"NE"},
+  {re:/包含|含有/,op:"CONTAINS"},
+  {re:/等于|是|为|=/,op:"EQ"}
+];
+const RT_NAMES=["仓库","场站","码头","船舶"];
+/* 规则条件里不出现"资源类型"（§2.2.1：资源类型由标签作用范围承担），此处仅供展示命名 */
+const FIELD_NAMES={resourceType:"资源类型"};
+
+/* —— 资源取值与条件求值（让 AI 草案的命中数是真实算出来的，不是编的） —— */
+function fieldValue(r,code){
+  switch(code){
+    case "warehouse_type":return r.wType||undefined;
+    case "area":return r.area;
+    case "ownership":return r.own;
+    case "operation_status":return r.status;
+    case "resourceType":return r.type;
+    default:return undefined;
+  }
+}
+function matchCond(c,r){
+  const v=fieldValue(r,c.field);
+  if(v===undefined||v===null||v==="—")return false;
+  const vals=c.values.map(String);
+  const num=parseFloat(vals[0]);
+  switch(c.op){
+    case "EQ":return String(v)===vals[0];
+    case "NE":return String(v)!==vals[0];
+    case "GT":return +v>num;
+    case "LT":return +v<num;
+    case "GE":return +v>=num;
+    case "LE":return +v<=num;
+    case "CONTAINS":return String(v).includes(vals[0]);
+    case "IN":return vals.includes(String(v));
+    default:return false;
+  }
+}
+function evalTree(g,r){
+  const rs=g.children.map(c=>c.logic?evalTree(c,r):matchCond(c,r));
+  return g.logic==="AND"?rs.every(Boolean):rs.some(Boolean);
+}
+function countMatches(g,list){return (list||RESOURCES).filter(r=>evalTree(g,r)).length;}
+function leaves(g,out){out=out||[];g.children.forEach(c=>c.logic?leaves(c,out):out.push(c));return out;}
+function explainTree(g,r){
+  return leaves(g).map(c=>{
+    const f=FIELDS.find(x=>x.code===c.field)||AI_FIELDS.find(x=>x.code===c.field)||{name:FIELD_NAMES[c.field]||c.field};
+    const op=(OPS[c.op]||{sym:c.op}).sym;
+    const v=fieldValue(r,c.field);
+    const shown=(v===undefined||v==="—")?"无值":v;
+    return `${f.name} ${op} ${c.values.join("、")} → ${shown} ${matchCond(c,r)?"✓":"✗"}`;
+  }).join("；");
+}
+
+/* —— 自然语言 → 条件树（mock：模型路径与降级路径共用同一解析内核） —— */
+function nlToTree(text){
+  const usedFields=[],unknown=[];
+  AI_UNKNOWN.forEach(u=>{if(text.includes(u))unknown.push(u);});
+  /* 顶层 或 → OR；组内 且 → AND */
+  const orParts=text.split(/或者|或是|或/).map(s=>s.trim()).filter(Boolean);
+  const buildClause=seg=>{
+    const andParts=seg.split(/并且|而且|且|同时/).map(s=>s.trim()).filter(Boolean);
+    const conds=[],byField={};
+    andParts.forEach(p=>{
+      const f=AI_FIELDS.find(x=>x.names.some(n=>p.includes(n)));
+      if(!f)return;
+      if(!usedFields.includes(f.code))usedFields.push(f.code);
+      let op="EQ";
+      for(const o of AI_OPS){if(o.re.test(p)){op=o.op;break;}}
+      let vals=[];
+      if(f.type==="enum"){
+        vals=f.opts.filter(o=>p.includes(o));
+      }else{
+        const num=(p.match(/(\d+(?:\.\d+)?)/)||[])[1];
+        if(num)vals=[num];
+        if(/万/.test(p)&&num)vals=[String(+num*10000)];
+      }
+      if(!vals.length)return;
+      if(f.type==="enum"&&vals.length>1){op="IN";}
+      if(byField[f.code]){const prev=byField[f.code];prev.op="IN";
+        prev.values=[...new Set([...prev.values,...vals])];}
+      else{const c={field:f.code,op,values:vals};byField[f.code]=c;conds.push(c);}
+    });
+    return conds;
+  };
+  let tree;
+  if(orParts.length>1){
+    const kids=orParts.map(p=>{const cs=buildClause(p);return cs.length===1?cs[0]:{logic:"AND",children:cs};})
+      .filter(k=>!(k.children&&!k.children.length));
+    tree={logic:"OR",children:kids};
+  }else{
+    const cs=buildClause(text);
+    tree={logic:"AND",children:cs};
+  }
+  /* 资源类型限定：题目语义「…的仓库」→ 资源类型 = 仓库。
+     注意先从原文剔除属性名，避免"仓库类型"里的"仓库"被误当成资源类型 */
+  let rtText=text;
+  AI_FIELDS.forEach(f=>f.names.forEach(n=>{rtText=rtText.split(n).join("");}));
+  const rt=RT_NAMES.find(n=>rtText.includes(n));
+  if(rt){
+    tree.children.unshift({field:"resourceType",op:"EQ",values:[rt]});
+    usedFields.push("resourceType");
+  }
+  return {tree,usedFields,unknown};
+}
+
+/* —— 8.3 可用性状态 —— */
+function renderAiStatus(){
+  const badge=$("#aiBadge"),meta=$("#aiMeta");
+  if(!badge)return;
+  if(AI.available){
+    badge.textContent="服务可用";badge.style.background="var(--success-bg)";badge.style.color="var(--success)";
+    meta.textContent=`主路径 LLM · ${AI.model} · 降级可用 · 检测于 ${AI.lastCheckAt}`;
+  }else{
+    badge.textContent="已降级";badge.style.background="var(--warning-bg)";badge.style.color="var(--warning)";
+    meta.textContent=`降级原因：${AI.degradedReason||"模型不可用"} · 主路径已切至规则解析器（FALLBACK）`;
+  }
+}
+function checkAiStatus(){
+  AI.lastCheckAt="2026-10-15 "+new Date().toTimeString().slice(0,5);
+  AI.available=!$("#aiSimulate")||!$("#aiSimulate").querySelector("input").checked;
+  AI.degradedReason=AI.available?null:"模型网关无响应（演示开关）";
+  renderAiStatus();
+  toast(AI.available?`AI 可用性检测：主路径 LLM 正常（${AI.model}）`:"AI 可用性检测：模型不可用，已降级到规则解析器，能力不中断",
+    AI.available?"success":"warning");
+}
+
+/* —— 8.1 自然语言转规则 —— */
+function aiRuleDraft(){
+  const txt=$("#aiText").value.trim();
+  if(!txt){toast("请输入自然语言描述","warning");return;}
+  const parsed=nlToTree(txt);
+  const simulatedOff=$("#aiSimulate")&&$("#aiSimulate").querySelector("input").checked;
+  let source=simulatedOff||!AI.available?"FALLBACK":"LLM";
+  const warnings=[];
+  if(simulatedOff||!AI.available)warnings.push("模型不可用/超时，已降级到规则解析器 NaturalLanguageRuleParser");
+  let validated=true;
+  if(parsed.unknown.length){
+    warnings.push(`模型输出未通过结构化校验：属性「${parsed.unknown.join("、")}」不在属性字典内，该条件已拒绝落地（不猜测、不静默丢弃）`);
+    validated=false;source="FALLBACK";
+  }
+  /* §2.2.1 口径：规则本身不限定资源类型——把资源类型条件摘出来，映射为标签作用范围 */
+  let wtree=JSON.parse(JSON.stringify(parsed.tree));
+  let scopeHint=null;
+  if(wtree.children){
+    const idx=wtree.children.findIndex(c=>c.field==="resourceType");
+    if(idx>=0){scopeHint=wtree.children[idx].values[0];wtree.children.splice(idx,1);}
+  }
+  const hasCond=!!(wtree.children&&wtree.children.length);
+  if(!hasCond){
+    warnings.push("解析后规则条件为空：资源类型限定已映射到标签作用范围，请再补充至少一个条件（空条件组不可保存）");
+    validated=false;
+  }
+  const semantic=hasCond?treeToText(wtree):"—";
+  const hitScope=scopeHint?RESOURCES.filter(r=>r.type===scopeHint):RESOURCES;
+  const hit=validated?countMatches(wtree,hitScope):0;
+  const usedList=parsed.usedFields.filter(c=>c!=="resourceType");
+  const srcTag=source==="LLM"
+    ?'<span class="status-tag status-tag--success">LLM</span>'
+    :'<span class="status-tag status-tag--warning">FALLBACK · 规则解析器</span>';
+  const body=`
+    <dl class="kv-list">
+      <dt>用户原句</dt><dd>${esc(txt)}</dd>
+      <dt>解析来源</dt><dd>${srcTag} ${source==="LLM"?"· "+esc(AI.model)+" · 1840ms":"· 属性别名表 + 单位表 + 比较词映射"}</dd>
+      <dt>条件树</dt><dd style="font-family:Consolas,monospace;">${esc(semantic)}</dd>
+      <dt>作用范围</dt><dd>${scopeHint?`资源类型 = <b>${esc(scopeHint)}</b>（映射到标签作用范围，不进入规则条件 —— §2.2.1）`:"沿用标签现有作用范围"}</dd>
+      <dt>识别字段</dt><dd>${usedList.map(c=>{const f=FIELDS.find(x=>x.code===c)||AI_FIELDS.find(x=>x.code===c)||{name:FIELD_NAMES[c]||c};return esc(f.name);}).join("、")||"—"}</dd>
+      <dt>结构化校验</dt><dd>${validated?'<span class="status-tag status-tag--success">通过 · 可落地</span>':'<span class="status-tag status-tag--danger">未通过 · 不可直接保存</span>'}</dd>
+      <dt>命中资源</dt><dd>${validated?`<b>${hit}</b> 个（演示数据集实时试算${scopeHint?`，作用范围内 ${hitScope.length} 个`:""}）`:"—（校验未通过，不试算）"}</dd>
+    </dl>
+    ${warnings.length?`<div class="match-callout" style="margin-top:12px;">${svg.warn}<div>${warnings.map(w=>esc(w)).join("<br>")}</div></div>`:""}
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">
+      模型只产出候选，<b>是否真正命中仍由规则引擎判定</b>——结果可复现、可解释（ADR-0007）。提示词不含资源明细。
+    </p>`;
+  openModal({title:"AI 规则草案（不写库）",body,lg:true,foot:[
+    {label:"放弃"},
+    {label:validated?"应用到编辑器":"仅保留可用条件",
+     cls:"btn-primary",
+     onClick:m=>{
+       const applyTree=tt=>{
+         ruleTree=tt;renderRuleBuilder();
+         if(scopeHint){
+           const t=TAGS.find(x=>x.id===$("#ruleTag").value);
+           if(t){t.scope=[scopeHint];renderTags();
+             toast(`资源类型条件已映射为标签作用范围（${scopeHint}，§2.2.1）`,"info");}
+         }
+       };
+       if(validated){applyTree(JSON.parse(JSON.stringify(wtree)));
+         toast("已应用到规则编辑器，可微调后保存","success");}
+       else{
+         /* 降级落地：剔除未通过校验的字段后入编辑器 */
+         const clean=nlToTree(txt.replace(new RegExp(parsed.unknown.join("|"),"g"),""))
+           .tree;
+         const cleaned=nlToTree(txt.replace(new RegExp(parsed.unknown.join("|"),"g"),""));
+         const ct=cleaned.tree;
+         const ci=ct.children?ct.children.findIndex(c=>c.field==="resourceType"):-1;
+         if(ci>=0){ct.children.splice(ci,1);}
+         if(ct.children&&ct.children.length){
+           applyTree(ct);
+           toast("未定义属性条件已被拒绝，其余条件已降级落地，请人工复核","warning");
+         }
+         else toast("无可用条件可落地，请改写描述","danger");
+       }
+       m.remove();
+     }}]});
+  addAudit("AI 转规则",txt.slice(0,20),`source=${source} validated=${validated}`);
+}
+
+/* —— 8.2 自然语言推荐标签 —— */
+function aiTagRecommend(presetText){
+  const body=document.createElement("div");
+  body.innerHTML=`
+    <div class="ai-box" style="margin-bottom:14px;">
+      <div class="ai-box__head">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2 14.5 9 21.5 11.5 14.5 14 12 21 9.5 14 2.5 11.5 9.5 9 12 2Z" fill="var(--primary)"/></svg>
+        描述你要找的资源，系统推荐匹配的标签 <span class="ai-badge" id="aiRecBadge">${AI.available?"服务可用":"已降级"}</span>
+      </div>
+      <textarea class="input ai-textarea" id="aiRecText" placeholder="例：想找战略价值为A级的资源">${esc(presetText||"想找战略价值为A级的资源")}</textarea>
+      <div class="ai-chip-row">
+        <span class="ai-chip" data-rec="想找战略价值为A级的资源">示例：分级价值</span>
+        <span class="ai-chip" data-rec="有没有冷链相关的仓库标签">示例：功能属性</span>
+        <span class="ai-chip" data-rec="面积很大的大型仓库">示例：规模条件</span>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" id="aiRecGo">推荐标签</button>
+        <span style="font-size:12px;color:var(--text-caption);">候选集合本地预筛（受数据权限约束），模型只做排序与理由生成</span>
+      </div>
+    </div>
+    <div id="aiRecResult"></div>`;
+  openModal({title:"AI 推荐标签",body,lg:true,foot:[{label:"关闭",cls:"btn-primary"}]});
+  const run=()=>{
+    const txt=body.querySelector("#aiRecText").value.trim();
+    if(!txt){toast("请输入描述","warning");return;}
+    renderRecResult(body,txt);
+  };
+  body.querySelector("#aiRecGo").onclick=run;
+  body.querySelectorAll("[data-rec]").forEach(c=>c.onclick=()=>{body.querySelector("#aiRecText").value=c.dataset.rec;run();});
+  if(!presetText)renderRecResult(body,body.querySelector("#aiRecText").value);
+}
+function renderRecResult(box,txt){
+  const source=AI.available?"LLM":"FALLBACK";
+  /* 排序打分：标签名/类型语义 + 规则字段 + 命中规模，均为确定性算法（可复现） */
+  const kw={分级:/战略|等级|A级|B级|价值|重要/,分类:/功能|类型|属性|仓|场站|码头/,规模:/大|面积|规模|万/,冷链:/冷链|冷藏|冷冻/,保税:/保税|海关/,智能:/智能|自动化/,危化:/危化|危险品/};
+  const scored=TAGS.filter(t=>t.status!=="DRAFT").map(t=>{
+    let s=0.25;
+    const nameHit=Object.entries(kw).some(([k,re])=>re.test(txt)&&re.test(t.name+t.rule+(t.type==="分级"?"分级":"")));
+    if(nameHit)s+=0.45;
+    if(kw.分级.test(txt)&&t.type==="分级")s+=0.2;
+    if(kw.分类.test(txt)&&t.type==="分类")s+=0.1;
+    if(kw.规模.test(txt)&&/面积/.test(t.rule))s+=0.12;
+    if(txt.includes(t.name.slice(0,2)))s+=0.15;
+    const count=t.count; /* 与标签管理页口径一致（全量数据），不按演示样本重算 */
+    s=Math.min(0.99,+(s+(count/220)).toFixed(2));
+    const reason=(()=>{
+      if(kw.分级.test(txt)&&t.type==="分级")return `标签名与用户表述的「战略价值/等级」语义一致，且属于分级标签`;
+      if(nameHit)return `标签名或规则与描述中的关键词语义匹配`;
+      if(/面积|规模|大/.test(txt)&&/面积/.test(t.rule))return `规则的面积阈值与「规模」表述相关`;
+      return `候选集合内按语义相似度排序`;
+    })();
+    return {t,count,score:s,reason};
+  }).filter(x=>x.score>=0.45).sort((a,b)=>b.score-a.score).slice(0,5);
+  const srcTag=source==="LLM"
+    ?`<span class="status-tag status-tag--success">LLM</span> <span style="color:var(--text-caption);font-size:12px;">${esc(AI.model)}</span>`
+    :`<span class="status-tag status-tag--warning">FALLBACK · 规则解析器</span>`;
+  if(!scored.length){
+    box.querySelector("#aiRecResult").innerHTML=`<div class="empty-state">
+      <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p>没有足够相关的标签——候选集合受你的数据权限约束，可换一种描述，或先新建标签</p></div>`;
+    return;
+  }
+  box.querySelector("#aiRecResult").innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;">
+      <span style="color:var(--text-caption);">解析来源</span>${srcTag}
+      <span style="color:var(--text-caption);margin-left:auto;">候选 ${TAGS.filter(t=>t.status!=="DRAFT").length} 个 · 返回 ${scored.length} 个</span>
+    </div>
+    <div class="sample-list">
+      ${scored.map(x=>`<div class="sample-item" style="align-items:flex-start;">
+        <span class="status-tag ${x.t.type==="分级"?"status-tag--warning":""}" style="height:22px;">${x.t.type==="分级"?"分级":"分类"}</span>
+        <div style="min-width:0;">
+          <div style="font-weight:500;">${esc(x.t.name)} <span style="font-size:12px;color:var(--text-caption);">· ${esc(x.t.org)} · 关联 ${x.count} 个资源</span></div>
+          <div style="font-family:Consolas,monospace;font-size:12px;color:var(--text-caption);margin-top:2px;">${esc(x.t.rule)}</div>
+          <div style="font-size:12px;color:var(--text-caption);margin-top:2px;">推荐理由：${esc(x.reason)}</div>
+        </div>
+        <div class="why"><b style="color:var(--primary);">${x.score}</b><br><button class="link-btn" data-goto="${x.t.id}">查看该标签</button></div>
+      </div>`).join("")}
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">
+      实现口径（S1 合规）：<b>本地先算候选标签集合</b>（受数据权限约束），模型只做排序与理由生成，减少外发内容。
+    </p>`;
+  box.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{
+    const t=TAGS.find(x=>x.id===b.dataset.goto);
+    document.querySelectorAll(".modal-mask").forEach(m=>m.remove());
+    switchTab("tag-list");
+    setTimeout(()=>{t&&tagRuleModal(t);},120);
+  });
+}
+/* 把规则摘要文本粗解析回条件树（仅用于推荐结果的命中数试算） */
+function ruleTextToTree(txt){
+  if(!txt||txt.startsWith("（"))return {logic:"AND",children:[]};
+  const parts=txt.replace(/^\(|\)$/g,"").split(/\s+(?:AND|OR)\s+/);
+  const conds=parts.map(p=>{
+    const m=p.replace(/[()]/g,"").match(/^\s*([^<>=≤≥∈∋!]+?)\s*(>=|<=|≥|≤|>|<|=|!=|∈|∋)\s*(.+?)\s*$/);
+    if(!m)return null;
+    const fname=m[1].trim(),sym=m[2],val=m[3].trim();
+    const f=FIELDS.find(x=>x.name===fname)||AI_FIELDS.find(x=>x.name===fname);
+    if(!f)return null;
+    const opMap={">=":"GE","<=":"LE","≥":"GE","≤":"LE",">":"GT","<":"LT","=":"EQ","!=":"NE","∈":"IN","∋":"CONTAINS"};
+    return {field:f.code,op:opMap[sym]||"EQ",values:val.split(/[、,]/).map(s=>s.trim())};
+  }).filter(Boolean);
+  return {logic:/OR/.test(txt)?"OR":"AND",children:conds};
+}
+
 /* ================= 事件委托 ================= */
 document.addEventListener("click",e=>{
   const act=e.target.closest("[data-act]");if(!act)return;
@@ -1489,20 +1845,9 @@ document.addEventListener("click",e=>{
   else if(a==="ruleDry")ruleDryRun();
   else if(a==="ruleEmpty"){ruleTree={logic:"AND",children:[]};renderRuleBuilder();
     setTimeout(()=>{toast("空条件组校验：保存被拒绝（见预览区提示）","danger");ruleTree=defaultRule();renderRuleBuilder();},900);}
-  else if(a==="aiTransfer"||a==="aiDry"){
-    const txt=$("#aiText").value.trim();
-    if(!txt){toast("请输入自然语言描述","warning");return;}
-    const parsed={logic:"OR",children:[
-      {logic:"AND",children:[{field:"warehouse_type",op:"EQ",values:["冷链"]},{field:"area",op:"GE",values:["5000"]}]},
-      {field:"ownership",op:"EQ",values:["自有"]}
-    ]};
-    if(a==="aiTransfer"){ruleTree=parsed;renderRuleBuilder();toast("AI 已将描述转成条件树，可在下方微调后保存","success");}
-    else openModal({title:"AI 解析预览（不写入编辑器）",body:`
-      <dl class="kv-list"><dt>输入</dt><dd>${esc(txt)}</dd>
-      <dt>条件树</dt><dd style="font-family:Consolas,monospace;">(仓库类型 = 冷链 AND 面积 ≥ 5000) OR 权属 = 自有</dd>
-      <dt>置信度</dt><dd><span class="status-tag status-tag--success">高 · 字段全部命中属性字典</span></dd></dl>`,
-      foot:[{label:"取消"},{label:"应用到编辑器",cls:"btn-primary",onClick:()=>{ruleTree=parsed;renderRuleBuilder();toast("已应用到编辑器","success");}}]});
-  }
+  else if(a==="aiRuleDraft")aiRuleDraft();
+  else if(a==="aiStatus")checkAiStatus();
+  else if(a==="aiTagRecommend")aiTagRecommend();
   else if(a==="matchRun")simulateMatch("全部生效标签");
   else if(a==="matchDetail")matchDetail();
   else if(a==="matchFail")openModal({title:"失败原因 — M-20261014-007",body:`
@@ -1522,6 +1867,16 @@ $$("[data-qtab]").forEach(ch=>ch.onclick=()=>{
 $("#ruleTag").onchange=loadRuleBuilder;
 /* AI 示例 chip */
 $$(".ai-chip[data-ai]").forEach(c=>c.onclick=()=>{$("#aiText").value=c.dataset.ai;});
+/* 模拟模型不可用开关：勾选即切到降级路径（演示 ADR-0007 降级不中断能力） */
+const aiSim=$("#aiSimulate");
+if(aiSim)aiSim.querySelector("input").onchange=e=>{
+  AI.available=!e.target.checked;
+  AI.degradedReason=e.target.checked?"模型网关无响应（演示开关）":null;
+  AI.lastCheckAt="2026-10-15 "+new Date().toTimeString().slice(0,5);
+  renderAiStatus();
+  toast(e.target.checked?"已模拟模型不可用：AI 能力将走规则解析器降级路径（功能不中断）":"已恢复：AI 能力走主路径 LLM",
+    e.target.checked?"warning":"success");
+};
 
 /* 资源新建表单 */
 function resForm(){
