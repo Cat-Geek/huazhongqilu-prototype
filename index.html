@@ -137,7 +137,7 @@ button{font-family:inherit;}
 .menu-item__parent.is-open .arrow{transform:rotate(180deg);}
 .menu-item__parent.is-active{color:var(--primary);background:var(--secondary);font-weight:600;border-radius:4px 4px 0 0;}
 .menu-children{height:0;overflow:hidden;opacity:0;transition:height var(--duration-normal) var(--ease-smooth),opacity var(--duration-fast) var(--ease-out);margin-bottom:0;}
-.menu-children.is-open{background:var(--secondary);border-radius:0 0 4px 4px;}
+.menu-children.is-open{opacity:1;background:var(--secondary);border-radius:0 0 4px 4px;}
 .menu-children ul{list-style:none;padding:4px 0;}
 .menu-item__child{
   position:relative;display:flex;align-items:center;padding:8px 16px 8px 42px;
@@ -876,9 +876,9 @@ function toast(msg,type="info",action){
 }
 
 /* ================= 弹窗 ================= */
-function openModal({title,body,foot,lg,onClose}){
+function openModal({title,body,foot,lg,cls,onClose}){
   const mask=document.createElement("div");mask.className="modal-mask";
-  mask.innerHTML=`<div class="modal${lg?" modal--lg":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+  mask.innerHTML=`<div class="modal${lg?" modal--lg":""}${cls?" "+cls:""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
     <div class="modal__head"><span class="modal__title">${esc(title)}</span><button class="modal__close" aria-label="关闭">✕</button></div>
     <div class="modal__body"></div>${foot?'<div class="modal__foot"></div>':""}</div>`;
   mask.querySelector(".modal__body").append(typeof body==="string"?Object.assign(document.createElement("div"),{innerHTML:body}):body);
@@ -891,7 +891,7 @@ function openModal({title,body,foot,lg,onClose}){
   $("#overlayRoot").appendChild(mask);return {mask,close};
 }
 function confirmDialog({title="确认操作",html,okLabel="确认",danger=false,onOk}){
-  return openModal({title,cls:"",body:`<div style="font-size:14px;line-height:20px;">${html}</div>`,
+  return openModal({title,cls:"confirm-dialog",body:`<div style="font-size:14px;line-height:20px;">${html}</div>`,
     foot:[{label:"取消"},{label:okLabel,cls:danger?"btn-danger":"btn-primary",onClick:m=>{m.remove();onOk&&onOk();}}],
     onClose:()=>{}});
 }
@@ -902,8 +902,20 @@ function setCollapsed(c){app.classList.toggle("is-collapsed",c);$("#sidebarColla
   try{localStorage.setItem("sidebarCollapsed",c?"1":"0");}catch(e){}}
 try{if(localStorage.getItem("sidebarCollapsed")==="1")app.classList.add("is-collapsed");}catch(e){}
 $("#sidebarCollapse").onclick=()=>setCollapsed(!app.classList.contains("is-collapsed"));
+/* 移动端抽屉：遮罩 + ESC 关闭（UI 规范 §8.1）；移动端不写 sidebarCollapsed 偏好，避免污染桌面端 */
+let mobileMask=null;
+function setMobileOpen(open){
+  app.classList.toggle("is-mobile-open",open);
+  if(open&&!mobileMask){
+    mobileMask=document.createElement("div");mobileMask.className="mobile-mask";
+    mobileMask.addEventListener("click",()=>setMobileOpen(false));
+    document.body.appendChild(mobileMask);
+  }else if(!open&&mobileMask){mobileMask.remove();mobileMask=null;}
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&app.classList.contains("is-mobile-open"))setMobileOpen(false);});
+window.addEventListener("resize",()=>{if(window.innerWidth>991&&app.classList.contains("is-mobile-open"))setMobileOpen(false);});
 $("#topbarToggle").onclick=()=>{
-  if(window.innerWidth<=991){app.classList.toggle("is-mobile-open");}
+  if(window.innerWidth<=991)setMobileOpen(!app.classList.contains("is-mobile-open"));
   else setCollapsed(!app.classList.contains("is-collapsed"));
 };
 /* 手风琴 */
@@ -981,7 +993,7 @@ function closeTab(id){
 }
 $$("[data-page]").forEach(el=>{
   el.addEventListener("click",()=>{
-    if(el.classList.contains("menu-item__child")&&window.innerWidth<=991)app.classList.remove("is-mobile-open");
+    if(el.classList.contains("menu-item__child")&&window.innerWidth<=991)setMobileOpen(false);
     switchTab(el.dataset.page);
     if(el.classList.contains("menu-item__child")&&el.closest(".menu-popover"))closePopover();
   });
