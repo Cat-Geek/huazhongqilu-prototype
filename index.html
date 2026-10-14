@@ -3,859 +3,1537 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>海运订舱系统 · 界面原型（华中齐鲁队）</title>
+<title>物流资源分类分级标签管理系统 — 华中齐鲁队</title>
 <style>
-/* ========== 设计令牌（公司 UI 规范） ========== */
+/* ================= 设计令牌（中国外运视觉UI规范） ================= */
 :root{
-  --primary:#0F65C1;
-  --primary-hover:#0A4A92;
-  --primary-active:#083A73;
-  --primary-light:#ECF3FA;
+  --primary:#0F65C1; --primary-hover:#0A4A92; --primary-active:#083A73;
   --secondary:#ECF3FA;
-  --success:#009B40;
-  --success-light:#E6F5EC;
-  --warning:#FF7122;
-  --warning-light:#FFF0E8;
-  --danger:#FF2222;
-  --danger-light:#FFEBEB;
-  --info:#636369;
-  --info-light:#F0F0F0;
-  --text-1:#3C3C43;
-  --text-2:#636369;
-  --text-3:#9B9B9F;
-  --border:#E9E9EA;
-  --border-light:#F0F0F0;
-  --bg:#F5F9FC;
-  --table-head:#ECF3FA;
-  --topbar-h:56px;
-  --sidebar-w:240px;
-  --sidebar-mini-w:80px;
-  --tab-h:36px;
-  --ctl-h:32px;
-  --ctl-h-sm:28px;
-  --tag-h:26px;
-  --radius:4px;
+  --success:#009B40; --success-bg:#E6F6EC;
+  --warning:#FF7122; --warning-bg:#FFF0E8;
+  --danger:#FF2222;  --danger-bg:#FFEBEB;
+  --surface:#FFFFFF;
+  --text-primary:#3C3C43; --text-caption:#636369; --text-disabled:#C2C2C4;
+  --border:#E9E9EA; --border-light:#F0F0F0;
+  --table-header-bg:#ECF3FA; --tag-bg:#ECF3FA; --disabled-bg:#F5F5F5;
+  --bg-body:linear-gradient(180deg,#ECF3FA 0%,#FFFFFF 40%);
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --text-xs:12px; --text-sm:14px; --text-base:16px; --text-lg:20px; --text-xl:18px; --text-2xl:24px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px; --space-6:24px; --space-8:32px;
+  --sidebar-width:240px; --sidebar-collapsed:80px; --topbar-height:56px;
+  --layout-sidebar-current:var(--sidebar-width);
+  --content-min-width:0px;
+  --control-height-sm:28px; --control-height-md:32px;
+  --ease-out:cubic-bezier(0.25,0.46,0.45,0.94);
+  --ease-smooth:cubic-bezier(0.2,0,0,1);
+  --duration-fast:200ms; --duration-normal:300ms; --duration-sidebar:280ms;
+  --component-primary-color:var(--primary);
+  --component-surface-color:var(--surface);
+  --component-text-color:var(--text-primary);
+  --component-caption-color:var(--text-caption);
+  --component-border-color:var(--border);
+  --component-border-light-color:var(--border-light);
+  --component-control-height-sm:var(--control-height-sm);
+  --component-control-height-md:var(--control-height-md);
+  --table-header-bg-color:var(--table-header-bg);
+  --tag-bg-color:var(--tag-bg);
+  --dialog-padding-primary:24px; --dialog-title-font-size:16px;
+  --dialog-content-font-size:14px; --dialog-content-line-height:20px;
+  --message-border-color:var(--primary);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font:14px/1.6 "Microsoft YaHei","PingFang SC",sans-serif;color:var(--text-1);background:var(--bg)}
-button{font-family:inherit;cursor:pointer}
-input,select{font-family:inherit}
-a{color:var(--primary);text-decoration:none}
-:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
-@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  font-size:14px;color:var(--text-primary);
+  background:var(--bg-body) fixed;-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:2px;}
+[hidden]{display:none!important;}
 
-/* ========== 登录页 ========== */
-#page-login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#0B4A8F 0%,#0F65C1 55%,#3B8AD9 100%)}
-.login-card{width:400px;background:#fff;border-radius:8px;padding:40px 36px;box-shadow:0 8px 32px rgba(10,40,80,.35)}
-.login-card h1{font-size:20px;text-align:center;color:var(--text-1);margin-bottom:4px}
-.login-card .sub{font-size:12px;color:var(--text-3);text-align:center;margin-bottom:28px}
-.login-card .field{margin-bottom:16px}
-.login-card label{display:block;font-size:13px;color:var(--text-2);margin-bottom:6px}
-.login-card input{width:100%;height:var(--ctl-h);border:1px solid var(--border);border-radius:var(--radius);padding:0 10px;font-size:14px}
-.login-card input:focus{border-color:var(--primary)}
-.login-card .btn-primary{width:100%;height:38px;margin-top:8px}
-.login-hint{margin-top:20px;font-size:12px;color:var(--text-3);background:var(--info-light);border-radius:var(--radius);padding:10px 12px;line-height:1.8}
-.login-err{display:none;margin-bottom:12px;padding:8px 12px;background:var(--danger-light);color:var(--danger);border-radius:var(--radius);font-size:13px}
+/* ================= 顶部导航栏 ================= */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-height);z-index:200;
+  background:var(--primary);color:#fff;display:flex;align-items:center;
+  padding:0 20px;gap:12px;box-shadow:var(--shadow-sm);
+}
+.topbar__toggle{
+  width:32px;height:32px;border:none;border-radius:4px;cursor:pointer;
+  background:transparent;color:rgba(255,255,255,0.9);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.topbar__toggle:hover{background:rgba(255,255,255,0.12);color:#fff;}
+.topbar__toggle:active{background:rgba(255,255,255,0.2);}
+.topbar__toggle:focus-visible{outline:2px solid rgba(255,255,255,0.6);outline-offset:2px;}
+.topbar__toggle .icon-hamburger{display:none;}
+.topbar__title{
+  font-size:var(--text-lg);font-weight:600;letter-spacing:0.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar__title small{font-size:12px;font-weight:400;opacity:.75;margin-left:10px;letter-spacing:0;}
+.topbar__spacer{flex:1;}
+.topbar__user{
+  display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;
+  cursor:pointer;position:relative;border:none;background:transparent;color:#fff;
+}
+.topbar__user:hover{background:rgba(255,255,255,0.08);}
+.topbar__user:active{background:rgba(255,255,255,0.14);}
+.topbar__user:focus-visible{outline:2px solid rgba(255,255,255,0.6);outline-offset:2px;}
+.avatar{
+  width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.topbar__username{font-size:14px;font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-menu{
+  position:fixed;top:60px;right:12px;min-width:220px;background:var(--surface);
+  border:1px solid var(--border-light);border-radius:8px;box-shadow:var(--shadow-md);
+  padding:8px 0;z-index:300;color:var(--text-primary);
+}
+.user-menu__role{padding:8px 16px;font-size:12px;color:var(--text-caption);border-bottom:1px solid var(--border-light);margin-bottom:4px;}
+.user-menu__item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;font-size:14px;}
+.user-menu__item:hover{background:var(--secondary);color:var(--primary);}
+.user-menu__item.is-current{color:var(--primary);font-weight:600;background:var(--secondary);}
 
-/* ========== 按钮 ========== */
-.btn{display:inline-flex;align-items:center;justify-content:center;height:var(--ctl-h-sm);padding:0 14px;
-  border-radius:var(--radius);border:1px solid var(--border);background:#fff;color:var(--text-1);font-size:13px;transition:all .15s}
-.btn:hover{border-color:var(--primary);color:var(--primary)}
-.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff}
-.btn-danger{color:var(--danger);border-color:var(--danger)}
-.btn-danger:hover{background:var(--danger);color:#fff}
-.btn-sm{height:var(--ctl-h-sm)}
-.link-btn{background:none;border:none;color:var(--primary);font-size:13px;padding:0 4px}
-.link-btn:hover{text-decoration:underline}
-.link-btn.danger{color:var(--danger)}
+/* ================= 侧边栏 ================= */
+.sidebar{
+  position:fixed;top:var(--topbar-height);left:0;bottom:0;width:var(--layout-sidebar-current);
+  background:var(--surface);border-right:1px solid var(--border-light);z-index:100;
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width var(--duration-sidebar) var(--ease-smooth),box-shadow var(--duration-fast) var(--ease-out);
+  will-change:width;
+}
+.app.is-collapsed .sidebar{box-shadow:var(--shadow-md);}
+.sidebar__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;flex-shrink:0;
+}
+.sidebar__head-title{font-size:var(--text-xs);color:#606060;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar__collapse{
+  width:32px;height:32px;border:none;border-radius:4px;background:transparent;
+  color:var(--text-caption);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sidebar__collapse:hover{background:var(--secondary);color:var(--text-primary);}
+.sidebar__collapse:active{background:var(--border-light);}
+.sidebar__collapse:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;}
+.sidebar__menu{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 12px 12px;}
+.menu-group{margin-bottom:8px;list-style:none;}
+.menu-item__parent{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-radius:4px;min-height:44px;height:44px;cursor:pointer;
+  color:var(--text-primary);user-select:none;
+}
+.menu-item__parent .left{display:flex;align-items:center;gap:12px;min-width:0;}
+.menu-item__parent .label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.menu-item__parent .menu-icon{width:18px;height:18px;color:var(--text-caption);flex-shrink:0;}
+.menu-item__parent .arrow{width:16px;height:16px;color:var(--text-caption);flex-shrink:0;transition:transform 300ms var(--ease-smooth);}
+.menu-item__parent:hover{background:var(--secondary);}
+.menu-item__parent:hover .menu-icon{color:var(--text-primary);}
+.menu-item__parent:active{background:var(--secondary);box-shadow:inset 0 0 0 1px var(--border);}
+.menu-item__parent:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;}
+.menu-item__parent.is-open{background:var(--secondary);border-radius:4px 4px 0 0;}
+.menu-item__parent.is-open .arrow{transform:rotate(180deg);}
+.menu-item__parent.is-active{color:var(--primary);background:var(--secondary);font-weight:600;border-radius:4px 4px 0 0;}
+.menu-children{height:0;overflow:hidden;opacity:0;transition:height var(--duration-normal) var(--ease-smooth),opacity var(--duration-fast) var(--ease-out);margin-bottom:0;}
+.menu-children.is-open{background:var(--secondary);border-radius:0 0 4px 4px;}
+.menu-children ul{list-style:none;padding:4px 0;}
+.menu-item__child{
+  position:relative;display:flex;align-items:center;padding:8px 16px 8px 42px;
+  border-radius:4px;cursor:pointer;color:var(--text-primary);font-size:14px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.menu-item__child::before{
+  content:"";position:absolute;left:33px;top:50%;transform:translateY(-50%);
+  width:3px;height:0;background:var(--primary);border-radius:2px;transition:height var(--duration-fast) var(--ease-out);
+}
+.menu-item__child:hover{background:rgba(255,255,255,0.65);color:var(--primary);}
+.menu-item__child:active{box-shadow:inset 0 0 0 1px var(--border);}
+.menu-item__child.is-selected{color:var(--primary);font-weight:600;background:transparent;}
+.menu-item__child.is-selected::before{height:16px;}
+/* 收起态 */
+.app.is-collapsed .sidebar__head{padding:12px 0;justify-content:center;}
+.app.is-collapsed .sidebar__head-title,.app.is-collapsed .label,.app.is-collapsed .arrow{opacity:0;visibility:hidden;width:0;pointer-events:none;}
+.app.is-collapsed .menu-item__parent{padding:12px;justify-content:center;min-height:48px;}
+.app.is-collapsed .sidebar__menu .menu-group{gap:4px;}
+.app.is-collapsed .menu-children{height:0!important;opacity:0!important;pointer-events:none!important;}
 
-/* ========== 应用框架 ========== */
-#app{display:none;min-height:100vh}
-.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--primary);color:#fff;
-  display:flex;align-items:center;padding:0 16px;z-index:100}
-.brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;white-space:nowrap}
-.brand .logo{width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px}
-.topbar .spacer{flex:1}
-.topbar .user{display:flex;align-items:center;gap:8px;font-size:13px}
-.topbar .user .avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:13px}
-.topbar .collapse-btn{background:none;border:none;color:#fff;font-size:18px;margin-right:12px;padding:4px 8px;border-radius:var(--radius)}
-.topbar .collapse-btn:hover{background:rgba(255,255,255,.15)}
+/* 收起态悬浮窗 */
+.menu-popover{
+  position:fixed;min-width:160px;background:var(--surface);border:1px solid var(--border-light);
+  border-radius:8px;box-shadow:var(--shadow-md);padding:8px 0;z-index:400;
+}
+.menu-popover__title{font-size:14px;font-weight:600;padding:8px 16px;border-bottom:1px solid var(--border-light);}
+.menu-popover__item{padding:8px 16px;font-size:14px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.menu-popover__item:hover{background:var(--secondary);color:var(--primary);}
+.menu-popover__item.is-selected{color:var(--primary);font-weight:600;background:var(--secondary);}
 
-.sidebar{position:fixed;top:var(--topbar-h);bottom:0;left:0;width:var(--sidebar-w);background:#fff;
-  border-right:1px solid var(--border-light);transition:width .2s;overflow:hidden;z-index:90}
-.sidebar.mini{width:var(--sidebar-mini-w)}
-.nav-group{padding:8px 0}
-.nav-group .group-title{font-size:12px;color:var(--text-3);padding:8px 16px 4px;white-space:nowrap}
-.nav-item{display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;color:var(--text-2);cursor:pointer;
-  border-left:3px solid transparent;white-space:nowrap;user-select:none}
-.nav-item:hover{background:var(--primary-light);color:var(--primary)}
-.nav-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);font-weight:600}
-.nav-item .ico{width:20px;text-align:center;font-size:15px;flex:none}
-.sidebar.mini .nav-item span,.sidebar.mini .group-title{display:none}
-.sidebar.mini .nav-item{justify-content:center;padding:0}
+/* ================= 页签栏 ================= */
+.main{
+  margin-left:var(--layout-sidebar-current);margin-top:var(--topbar-height);
+  width:calc(100% - var(--layout-sidebar-current));min-width:var(--content-min-width);
+  padding:0 24px 24px;
+  transition:margin-left var(--duration-sidebar) var(--ease-smooth),width var(--duration-sidebar) var(--ease-smooth);
+}
+.app.is-collapsed .main{--layout-sidebar-current:var(--sidebar-collapsed);}
+.tabs-bar{
+  position:sticky;top:56px;z-index:50;height:36px;background:var(--surface);
+  border-bottom:1px solid var(--border-light);box-shadow:var(--shadow-sm);
+  margin:0 -24px;overflow-x:auto;overflow-y:hidden;min-width:0;
+}
+.tabs-bar__inner{display:flex;align-items:center;gap:4px;padding:4px 24px 0 24px;min-width:max-content;}
+.tab-item{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:4px;cursor:pointer;flex-shrink:0;}
+.tab-item span{font-size:12px;color:#606060;white-space:nowrap;}
+.tab-item:hover{background:var(--secondary);}
+.tab-item.is-active span{color:var(--primary);font-weight:600;}
+.tab-close{
+  width:14px;height:14px;border:none;border-radius:50%;background:transparent;
+  color:var(--text-disabled);font-size:10px;line-height:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.tab-close:hover{background:var(--border-light);color:var(--text-primary);}
 
-.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);padding:12px 16px 32px;transition:margin .2s}
-.main.wide{margin-left:var(--sidebar-mini-w)}
+/* ================= 主内容 ================= */
+.page-header{position:sticky;top:92px;z-index:49;background:var(--bg-body);padding:12px 0 8px;}
+.page-header h1{font-size:var(--text-xl);font-weight:600;color:var(--text-primary);margin:0;}
+.main-inner{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.block{background:var(--surface);border-radius:4px;padding:16px;box-shadow:var(--shadow-sm);min-width:0;}
+.block__title{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.block__title .sub{font-weight:400;font-size:12px;color:var(--text-caption);}
 
-/* ========== 页签栏 ========== */
-.tabbar{display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--border);margin-bottom:12px}
-.tab{height:var(--tab-h);display:flex;align-items:center;padding:0 16px;font-size:13px;color:var(--text-2);
-  border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;background:none}
-.tab:hover{color:var(--primary)}
-.tab.active{background:#fff;border-color:var(--border);color:var(--primary);font-weight:600;position:relative;top:1px}
+/* 筛选栏 */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;background:var(--surface);padding:16px;border-radius:4px;box-shadow:var(--shadow-sm);}
+.filter-bar__conditions{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;}
+.filter-bar__actions{flex-shrink:0;margin-left:auto;display:flex;gap:8px;align-items:center;}
+.cond{display:inline-flex;align-items:center;gap:8px;}
+.cond>label{font-size:14px;color:var(--text-caption);white-space:nowrap;}
 
-/* ========== 页面与卡片 ========== */
-.page{display:none}
-.page.active{display:block}
-.page-title{font-size:18px;font-weight:600;margin-bottom:12px}
-.card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:12px;margin-bottom:12px}
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.toolbar .grow{flex:1}
-.toolbar label{font-size:13px;color:var(--text-2)}
-.toolbar input,.toolbar select{height:var(--ctl-h-sm);border:1px solid var(--border);border-radius:var(--radius);padding:0 8px;font-size:13px}
-.toolbar input:focus,.toolbar select:focus{border-color:var(--primary)}
+/* 按钮与控件 */
+.btn{
+  height:var(--control-height-md);padding:0 16px;border-radius:4px;border:1px solid transparent;
+  font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:background var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);
+}
+.btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+.btn-sm{height:var(--control-height-sm);padding:0 12px;font-size:13px;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-hover);color:var(--surface);}
+.btn-primary:active{background:var(--primary-active);}
+.btn-primary.is-plain{background:var(--surface);color:var(--primary);border-color:#BBD4EE;}
+.btn-primary.is-plain:hover{background:var(--secondary);color:var(--primary);}
+.btn-primary:disabled,.btn-primary:disabled:hover{background:var(--disabled-bg);color:var(--text-disabled);border-color:var(--disabled-bg);cursor:not-allowed;}
+.btn-default{background:var(--surface);color:var(--text-primary);border-color:var(--border);}
+.btn-default:hover{background:var(--secondary);color:var(--primary);border-color:#BBD4EE;}
+.btn-danger{background:var(--surface);color:var(--danger);border-color:#FFC9C9;}
+.btn-danger:hover{background:var(--danger-bg);}
+.link-btn{border:none;background:none;color:var(--primary);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;}
+.link-btn:hover{background:var(--secondary);}
+.link-btn.danger{color:var(--danger);}
+.link-btn:disabled{color:var(--text-disabled);cursor:not-allowed;}
+.input,.select{
+  height:var(--control-height-md);padding:0 10px;border:1px solid var(--border);border-radius:4px;
+  font-size:14px;color:var(--text-primary);background:var(--surface);min-width:0;
+}
+.input-sm,.select-sm{height:var(--control-height-sm);font-size:13px;}
+.input:focus,.select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(15,101,193,0.12);}
+.input::placeholder{color:var(--text-disabled);}
+.input:disabled{background:var(--disabled-bg);cursor:not-allowed;}
 
-/* ========== 表格 ========== */
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--table-head);color:var(--text-2);font-weight:600;text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid var(--border-light);color:var(--text-1);line-height:14px;font-weight:400;vertical-align:middle}
-tbody tr:hover{background:#F7FAFD}
-.tbl-wrap{overflow-x:auto}
-.num{font-variant-numeric:tabular-nums}
+/* 状态标签 */
+.status-tag{
+  display:inline-flex;align-items:center;justify-content:center;height:26px;padding:0 10px;
+  border-radius:4px;font-size:12px;background:var(--tag-bg);color:var(--primary);white-space:nowrap;
+}
+.status-tag--success{background:var(--success-bg);color:var(--success);}
+.status-tag--warning{background:var(--warning-bg);color:var(--warning);}
+.status-tag--danger{background:var(--danger-bg);color:var(--danger);}
+.status-tag--gray{background:#F2F2F3;color:var(--text-caption);}
+.status-tag.is-disabled{opacity:0.5;background:var(--surface);cursor:not-allowed;}
+.status-tag+.status-tag{margin-left:6px;}
 
-/* ========== 标签 ========== */
-.tag{display:inline-flex;align-items:center;height:var(--tag-h);padding:0 10px;border-radius:13px;font-size:12px;white-space:nowrap}
-.tag-blue{background:var(--primary-light);color:var(--primary)}
-.tag-green{background:var(--success-light);color:var(--success)}
-.tag-orange{background:var(--warning-light);color:var(--warning)}
-.tag-red{background:var(--danger-light);color:var(--danger)}
-.tag-gray{background:var(--info-light);color:var(--info)}
+/* 数据表格 */
+.table-scroll{overflow-x:auto;max-width:100%;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th.data-table__cell{
+  background:var(--table-header-bg);white-space:nowrap;text-align:left;
+  font-weight:500;color:var(--text-primary);
+}
+.data-table td.data-table__cell,.data-table th.data-table__cell{padding:11px 12px;border-bottom:1px solid var(--border-light);font-size:13px;}
+.data-table .data-table__content{line-height:14px;font-weight:400;}
+.data-table tbody tr{transition:background var(--duration-fast) var(--ease-out);cursor:default;}
+.data-table tbody tr:hover{background:#F7FAFD;}
+.table-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-top:12px;font-size:13px;color:var(--text-caption);}
+.page-btn{min-width:28px;height:28px;border:1px solid var(--border);background:var(--surface);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-primary);}
+.page-btn.is-current{background:var(--primary);color:#fff;border-color:var(--primary);}
 
-/* ========== 分页 ========== */
-.pager{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:12px;font-size:13px;color:var(--text-2)}
-.pager .pg{min-width:28px;height:28px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;
-  display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
-.pager .pg.cur{background:var(--primary);border-color:var(--primary);color:#fff}
+/* 统计卡片 */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.stat-card{background:var(--surface);border-radius:4px;padding:16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:8px;}
+.stat-card__label{font-size:13px;color:var(--text-caption);display:flex;align-items:center;gap:6px;}
+.stat-card__value{font-size:var(--text-2xl);font-weight:600;font-variant-numeric:tabular-nums;}
+.stat-card__delta{font-size:12px;color:var(--text-caption);}
+.stat-card__delta b{color:var(--success);font-weight:600;}
 
-/* ========== 弹窗 ========== */
-.modal-mask{display:none;position:fixed;inset:0;background:rgba(15,30,50,.45);z-index:200;
-  align-items:flex-start;justify-content:center;padding:48px 16px;overflow:auto}
-.modal-mask.open{display:flex}
-.modal{background:#fff;border-radius:8px;width:680px;max-width:100%;box-shadow:0 12px 40px rgba(10,30,60,.3)}
-.modal.wide{width:860px}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-light)}
-.modal-head h3{font-size:16px}
-.modal-head .x{background:none;border:none;font-size:18px;color:var(--text-3);line-height:1}
-.modal-head .x:hover{color:var(--danger)}
-.modal-body{padding:16px 20px;max-height:62vh;overflow:auto}
-.modal-foot{padding:12px 20px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:8px}
+/* 简易条形图 */
+.bar-row{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:12px;padding:6px 0;font-size:13px;}
+.bar-track{height:14px;background:var(--secondary);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--primary);border-radius:3px;transition:width var(--duration-normal) var(--ease-smooth);}
+.bar-row .num{text-align:right;color:var(--text-caption);font-variant-numeric:tabular-nums;}
 
-/* ========== 表单 ========== */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
-.form-grid .full{grid-column:1/-1}
-.form-item label{display:block;font-size:13px;color:var(--text-2);margin-bottom:4px}
-.form-item label .req{color:var(--danger);margin-left:2px}
-.form-item input,.form-item select,.form-item textarea{width:100%;height:var(--ctl-h);border:1px solid var(--border);
-  border-radius:var(--radius);padding:0 10px;font-size:13px}
-.form-item textarea{height:auto;padding:6px 10px;resize:vertical}
-.form-item input:focus,.form-item select:focus,.form-item textarea:focus{border-color:var(--primary)}
+/* 空态 */
+.empty-state{padding:48px 16px;text-align:center;color:var(--text-caption);}
+.empty-state .icon{width:48px;height:48px;margin:0 auto 12px;color:var(--text-disabled);}
+.empty-state p{font-size:13px;}
+.empty-state .btn{margin-top:12px;}
 
-/* ========== 手风琴（四份档案） ========== */
-.accordion{border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden}
-.acc-item+.acc-item{border-top:1px solid var(--border-light)}
-.acc-head{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;cursor:pointer;user-select:none}
-.acc-head:hover{background:#F7FAFD}
-.acc-head .arrow{transition:transform .2s;font-size:12px;color:var(--text-3)}
-.acc-item.open .acc-head .arrow{transform:rotate(90deg)}
-.acc-head .name{font-weight:600;font-size:14px}
-.acc-head .count{font-size:12px;color:var(--text-3)}
-.acc-body{display:none;padding:4px 14px 12px;background:#FBFCFE}
-.acc-item.open .acc-body{display:block}
+/* 弹窗 */
+.modal-mask{
+  position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.modal{
+  background:var(--surface);border-radius:8px;box-shadow:var(--shadow-md);
+  width:640px;max-width:100%;max-height:calc(100vh - 96px);display:flex;flex-direction:column;
+}
+.modal--lg{width:880px;}
+.modal__head{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border-light);flex-shrink:0;}
+.modal__title{font-size:var(--dialog-title-font-size);font-weight:600;}
+.modal__close{width:28px;height:28px;border:none;background:none;border-radius:4px;cursor:pointer;color:var(--text-caption);font-size:16px;}
+.modal__close:hover{background:var(--secondary);color:var(--text-primary);}
+.modal__body{padding:var(--dialog-padding-primary);overflow-y:auto;font-size:var(--dialog-content-font-size);line-height:var(--dialog-content-line-height);}
+.modal__foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 24px 20px;border-top:1px solid var(--border-light);flex-shrink:0;}
+/* 确认弹窗 */
+.confirm-dialog{width:420px;}
+.confirm-dialog .modal__body{padding:24px 24px 8px;}
 
-/* ========== 步骤条（订舱单详情） ========== */
-.steps{display:flex;align-items:center;gap:0;margin-bottom:16px}
-.step{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
-.step .dot{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:#fff;
-  display:inline-flex;align-items:center;justify-content:center;font-size:12px}
-.step.done{color:var(--success)}
-.step.done .dot{background:var(--success);border-color:var(--success);color:#fff}
-.step.cur{color:var(--primary);font-weight:600}
-.step.cur .dot{background:var(--primary);border-color:var(--primary);color:#fff}
-.step-line{width:36px;height:1px;background:var(--border);margin:0 8px}
-.step-line.done{background:var(--success)}
-.step.cancelled{color:var(--danger)}
-.step.cancelled .dot{background:var(--danger);border-color:var(--danger);color:#fff}
+/* 表单 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+.form-item{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.form-item--full{grid-column:1/-1;}
+.form-item>label{font-size:13px;color:var(--text-caption);}
+.form-item>label .req{color:var(--danger);margin-left:2px;}
+.form-item .hint{font-size:12px;color:var(--text-disabled);}
+.form-item .err{font-size:12px;color:var(--danger);display:none;}
+.form-item.has-error .input,.form-item.has-error .select{border-color:var(--danger);}
+.form-item.has-error .err{display:block;}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:8px;}
+.check-chip{
+  display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:4px;
+  border:1px solid var(--border);background:var(--surface);font-size:13px;cursor:pointer;user-select:none;
+}
+.check-chip:hover{border-color:var(--primary);color:var(--primary);}
+.check-chip.is-on{background:var(--secondary);border-color:var(--primary);color:var(--primary);font-weight:500;}
+.radio-line{display:flex;gap:16px;align-items:center;font-size:14px;}
+.color-dot{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:-2px;border:1px solid rgba(0,0,0,0.08);}
 
-/* ========== 详情字段 ========== */
-.desc{display:grid;grid-template-columns:110px 1fr 110px 1fr;gap:0;border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
-.desc dt{background:#F7F9FC;color:var(--text-2);padding:7px 12px;font-size:13px;border-bottom:1px solid var(--border-light)}
-.desc dd{padding:7px 12px;font-size:13px;border-bottom:1px solid var(--border-light)}
-.desc .col2{grid-row:span 1}
-.sub-title{font-size:14px;font-weight:600;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
-.sub-title .tag{height:22px;font-size:11px}
+/* 规则编辑器 */
+.rule-builder{border:1px solid var(--border);border-radius:6px;padding:12px;background:#FBFDFF;}
+.rb-group{border:1px dashed #BBD4EE;border-radius:6px;padding:10px;background:var(--surface);}
+.rb-group+.rb-group,.rb-group .rb-children .rb-row{margin-top:8px;}
+.rb-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.rb-logic{
+  height:28px;border:1px solid var(--primary);color:var(--primary);background:var(--secondary);
+  border-radius:4px;font-size:13px;font-weight:600;padding:0 14px;cursor:pointer;
+}
+.rb-cond{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.rb-cond .select,.rb-cond .input{flex:0 1 auto;}
+.rb-cond .val{min-width:120px;}
+.rb-row{display:flex;align-items:flex-start;gap:8px;}
+.rb-row .rb-cond{flex:1;}
+.rb-del{width:28px;height:28px;border:none;background:none;color:var(--text-disabled);cursor:pointer;border-radius:4px;flex-shrink:0;}
+.rb-del:hover{background:var(--danger-bg);color:var(--danger);}
+.rb-actions{display:flex;gap:8px;margin-top:10px;padding-left:2px;}
+.rb-preview{
+  margin-top:12px;padding:10px 12px;background:var(--secondary);border-radius:6px;
+  font-family:Consolas,Menlo,monospace;font-size:12.5px;color:var(--primary-hover);line-height:1.7;word-break:break-all;
+}
+.rb-preview b{color:var(--warning);}
 
-/* ========== 提示条 ========== */
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);
-  border-left:3px solid var(--success);border-radius:var(--radius);padding:10px 18px;font-size:13px;
-  box-shadow:0 6px 20px rgba(10,30,60,.15);z-index:300;display:none}
-.toast.err{border-left-color:var(--danger)}
-.toast.warn{border-left-color:var(--warning)}
+/* 试跑/匹配详情 */
+.kv-list{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:13px;}
+.kv-list dt{color:var(--text-caption);white-space:nowrap;}
+.kv-list dd{margin:0;}
+.sample-list{border:1px solid var(--border-light);border-radius:6px;overflow:hidden;}
+.sample-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border-light);font-size:13px;}
+.sample-item:last-child{border-bottom:none;}
+.sample-item .why{color:var(--text-caption);font-size:12px;margin-left:auto;text-align:right;}
+.sample-item.is-miss .name{color:var(--text-caption);}
+.progress{height:8px;background:var(--secondary);border-radius:4px;overflow:hidden;}
+.progress__fill{height:100%;background:var(--primary);border-radius:4px;transition:width var(--duration-normal) var(--ease-smooth);}
+.match-callout{
+  display:flex;gap:10px;align-items:flex-start;background:var(--warning-bg);border:1px solid #FFD9C2;
+  border-radius:6px;padding:12px;font-size:13px;color:#A84A17;
+}
+.match-callout .btn{margin-left:auto;flex-shrink:0;}
 
-/* ========== 打印 ========== */
-.print-area{background:#fff;border:1px solid var(--border);padding:24px 28px}
-.print-area h2{text-align:center;font-size:18px;margin-bottom:4px}
-.print-area .p-no{text-align:center;font-size:12px;color:var(--text-3);margin-bottom:16px}
-.print-area table{margin-bottom:12px}
-@media print{
-  .topbar,.sidebar,.tabbar,.no-print{display:none!important}
-  .main{margin:0!important;padding:0!important}
-  body{background:#fff}
+/* toast */
+.toast-wrap{position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:900;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast-message{
+  display:flex;align-items:center;gap:10px;min-width:280px;max-width:560px;
+  padding:10px 16px;border-radius:6px;box-shadow:var(--shadow-md);font-size:14px;
+  background:var(--surface);border:1px solid var(--border);
+  animation:toastIn var(--duration-normal) var(--ease-smooth);
+}
+.toast-message--info{background:var(--secondary);border-color:var(--message-border-color);}
+.toast-message--success{border-color:var(--success);}
+.toast-message--danger{border-color:var(--danger);}
+.toast-message--warning{border-color:var(--warning);}
+.toast-message .t-icon{flex-shrink:0;}
+.toast-message--info .t-icon{color:var(--primary);}
+.toast-message--success .t-icon{color:var(--success);}
+.toast-message--danger .t-icon{color:var(--danger);}
+.toast-message--warning .t-icon{color:var(--warning);}
+.toast-message .t-action{margin-left:auto;border:none;background:none;color:var(--primary);font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+
+/* AI */
+.ai-box{border:1px solid #BBD4EE;border-radius:6px;padding:12px;background:linear-gradient(135deg,#F4F9FF 0%,#ECF3FA 100%);}
+.ai-box__head{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--primary);margin-bottom:8px;}
+.ai-badge{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;background:var(--success-bg);color:var(--success);font-size:11px;font-weight:500;}
+.ai-textarea{width:100%;min-height:56px;resize:vertical;}
+.ai-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ai-chip{font-size:12px;color:var(--primary);background:var(--surface);border:1px solid #BBD4EE;border-radius:12px;padding:2px 10px;cursor:pointer;}
+.ai-chip:hover{background:var(--secondary);}
+
+/* 描述列表（资源详情） */
+.desc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 20px;font-size:13px;}
+.desc-grid .dt{color:var(--text-caption);}
+.desc-grid .dd{font-weight:500;margin-top:2px;}
+.tag-chip{
+  display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:4px;
+  font-size:12px;background:var(--tag-bg);color:var(--primary);margin:0 6px 6px 0;
+}
+.tag-chip i{width:8px;height:8px;border-radius:2px;display:inline-block;}
+.section-h{font-size:13px;font-weight:600;color:var(--text-caption);margin:16px 0 8px;}
+.section-h:first-child{margin-top:0;}
+
+/* 移动端遮罩 */
+.mobile-mask{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:99;}
+
+/* 响应式 */
+@media (max-width:991px){
+  .sidebar{transform:translateX(-100%);transition:transform var(--duration-sidebar) var(--ease-smooth);width:var(--sidebar-width)!important;}
+  .app.is-mobile-open .sidebar{transform:translateX(0);box-shadow:var(--shadow-md);}
+  .main{margin-left:0!important;width:100%;}
+  .topbar__toggle .icon-collapse{display:none;}
+  .topbar__toggle .icon-hamburger{display:block;}
+  .sidebar__collapse{display:none;}
+  .form-grid{grid-template-columns:1fr;}
+  .page-header{top:92px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:0.01ms!important;animation-duration:0.01ms!important;}
 }
 </style>
 </head>
 <body>
+<div class="app" id="app">
 
-<!-- ============ 登录页 ============ -->
-<div id="page-login">
-  <div class="login-card">
-    <h1>海运订舱系统</h1>
-    <div class="sub">华中齐鲁队 · 智驭规格 · 码动效能</div>
-    <div class="login-err" id="login-err">用户名或口令不正确</div>
-    <div class="field">
-      <label for="login-user">用户名</label>
-      <input id="login-user" value="zhaoming" autocomplete="username">
-    </div>
-    <div class="field">
-      <label for="login-pass">口令</label>
-      <input id="login-pass" type="password" value="demo1234" autocomplete="current-password">
-    </div>
-    <button class="btn btn-primary" style="height:38px" aria-label="登录" onclick="doLogin()">登 录</button>
-    <div class="login-hint">
-      演示账号（角色不同，菜单不同）：<br>
-      销售 <b>zhaoming</b> ｜ 操作 <b>caozuo</b> ｜ 管理员 <b>admin</b><br>
-      口令均为 <b>demo1234</b>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 应用 ============ -->
-<div id="app">
+  <!-- ============ 顶部导航栏 ============ -->
   <header class="topbar">
-    <button class="collapse-btn" aria-label="折叠侧边栏" onclick="toggleSidebar()">☰</button>
-    <div class="brand"><span class="logo">🚢</span><span class="brand-name">海运订舱系统</span></div>
-    <div class="spacer"></div>
-    <div class="user">
-      <span id="user-role-tag" class="tag tag-blue">销售</span>
-      <span class="avatar" aria-hidden="true">赵</span>
-      <span id="user-name">赵明</span>
-      <button class="link-btn" style="color:#fff;margin-left:8px" aria-label="退出登录" onclick="doLogout()">退出</button>
-    </div>
+    <button class="topbar__toggle" id="topbarToggle" aria-label="切换侧边栏">
+      <svg class="icon-collapse" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3.5h12M2 8h12M2 12.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <svg class="icon-hamburger" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3.5h12M2 8h12M2 12.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <div class="topbar__title">物流资源分类分级标签管理系统<small>外运华中 · 华中齐鲁队</small></div>
+    <div class="topbar__spacer"></div>
+    <button class="topbar__user" id="userBtn" aria-label="用户菜单" aria-expanded="false">
+      <span class="avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.5" fill="#fff"/><path d="M4.5 19.5c1.6-3.2 4.3-5 7.5-5s5.9 1.8 7.5 5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+      <span class="topbar__username">屈越 · 集团标签管理员</span>
+    </button>
   </header>
+  <div class="user-menu" id="userMenu" hidden role="menu">
+    <div class="user-menu__role">当前数据范围：华中区域（本单位及下级单位）</div>
+    <div class="user-menu__item is-current" role="menuitem">华中区域公司（当前）</div>
+    <div class="user-menu__item" role="menuitem">武汉分公司</div>
+    <div class="user-menu__item" role="menuitem">长沙分公司</div>
+    <div class="user-menu__item" role="menuitem">郑州分公司</div>
+    <div class="user-menu__item" role="menuitem" style="border-top:1px solid var(--border-light);margin-top:4px;color:var(--danger);">退出登录</div>
+  </div>
 
-  <nav class="sidebar" id="sidebar" aria-label="主导航">
-    <div class="nav-group">
-      <div class="group-title">业务作业</div>
-      <div class="nav-item" data-page="schedules" role="button" tabindex="0" aria-label="船期与运价"><span class="ico">📅</span><span>船期与运价</span></div>
-      <div class="nav-item" data-page="quotes" role="button" tabindex="0" aria-label="报价管理"><span class="ico">💰</span><span>报价管理</span></div>
-      <div class="nav-item" data-page="bookings" role="button" tabindex="0" aria-label="订舱单"><span class="ico">📄</span><span>订舱单</span></div>
+  <!-- ============ 侧边栏 ============ -->
+  <nav class="sidebar" aria-label="主导航">
+    <div class="sidebar__head">
+      <span class="sidebar__head-title">全部功能</span>
+      <button class="sidebar__collapse" id="sidebarCollapse" aria-label="收起或展开侧边栏" aria-expanded="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
-    <div class="nav-group">
-      <div class="group-title">基础数据</div>
-      <div class="nav-item" data-page="parties" role="button" tabindex="0" aria-label="往来单位档案"><span class="ico">📇</span><span>往来单位档案</span></div>
-    </div>
-    <div class="nav-group">
-      <div class="group-title">系统管理</div>
-      <div class="nav-item" data-page="users" role="button" tabindex="0" aria-label="用户与角色"><span class="ico">👥</span><span>用户与角色</span></div>
-      <div class="nav-item" data-page="logs" role="button" tabindex="0" aria-label="操作日志"><span class="ico">📋</span><span>操作日志</span></div>
-    </div>
+    <ul class="sidebar__menu" id="menu">
+      <li class="menu-group">
+        <div class="menu-item__parent" data-page="dashboard" role="menuitem" tabindex="0">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3" width="8" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="10" width="8" height="11" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span class="label">工作台</span>
+          </span>
+        </div>
+      </li>
+      <li class="menu-group">
+        <div class="menu-item__parent has-children" data-group="res" tabindex="0" aria-expanded="false">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span class="label">资源管理</span>
+          </span>
+          <svg class="arrow" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="menu-children" id="grp-res">
+          <ul>
+            <li class="menu-item__child" data-page="resource-list" tabindex="0">资源台账</li>
+            <li class="menu-item__child" data-page="meta-type" tabindex="0">资源类型与属性</li>
+          </ul>
+        </div>
+      </li>
+      <li class="menu-group">
+        <div class="menu-item__parent has-children" data-group="tag" tabindex="0" aria-expanded="false">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M3 11V4a1 1 0 0 1 1-1h7l10 10-8 8L3 11Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>
+            <span class="label">标签中心</span>
+          </span>
+          <svg class="arrow" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="menu-children" id="grp-tag">
+          <ul>
+            <li class="menu-item__child" data-page="tag-list" tabindex="0">标签管理</li>
+            <li class="menu-item__child" data-page="rule-config" tabindex="0">打标规则配置</li>
+            <li class="menu-item__child" data-page="match-task" tabindex="0">自动匹配任务</li>
+          </ul>
+        </div>
+      </li>
+      <li class="menu-group">
+        <div class="menu-item__parent" data-page="query-center" role="menuitem" tabindex="0">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <span class="label">标签查询</span>
+          </span>
+        </div>
+      </li>
+      <li class="menu-group">
+        <div class="menu-item__parent has-children" data-group="sys" tabindex="0" aria-expanded="false">
+          <span class="left">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.5-2-1.5c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <span class="label">系统设置</span>
+          </span>
+          <svg class="arrow" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="menu-children" id="grp-sys">
+          <ul>
+            <li class="menu-item__child" data-page="audit-log" tabindex="0">操作审计</li>
+          </ul>
+        </div>
+      </li>
+    </ul>
   </nav>
 
-  <main class="main" id="main">
+  <!-- ============ 主内容 ============ -->
+  <main class="main">
+    <div class="tabs-bar"><div class="tabs-bar__inner" id="tabsInner"></div></div>
+    <div class="page-header"><h1 id="pageTitle">工作台</h1></div>
+    <div class="main-inner" id="pageContainer">
 
-    <!-- ===== 船期与运价 ===== -->
-    <section class="page" id="page-schedules">
-      <div class="page-title">船期与运价</div>
-      <div class="card">
-        <div class="toolbar">
-          <label>起运港</label><input id="f-origin" placeholder="如 QINGDAO" style="width:120px" oninput="renderSchedules()">
-          <label>目的港</label><input id="f-dest" placeholder="如 HAMBURG" style="width:120px" oninput="renderSchedules()">
-          <label>ETD 从</label><input id="f-etd1" type="date" style="width:140px" onchange="renderSchedules()">
-          <label>至</label><input id="f-etd2" type="date" style="width:140px" onchange="renderSchedules()">
-          <div class="grow"></div>
-          <button class="btn btn-primary" aria-label="新建船期" onclick="openModal('modal-schedule')">＋ 新建船期</button>
+      <!-- ===== 页面：工作台 ===== -->
+      <section class="page" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-card__label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="var(--primary)" stroke-width="1.6"/></svg>资源总数</span>
+            <span class="stat-card__value">218</span>
+            <span class="stat-card__delta">较上周 <b>+6</b> · 覆盖 4 类资源</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11V4a1 1 0 0 1 1-1h7l10 10-8 8L3 11Z" stroke="var(--primary)" stroke-width="1.6"/></svg>生效标签</span>
+            <span class="stat-card__value">14</span>
+            <span class="stat-card__delta">分类 9 · 分级 5 · 草稿 3</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--primary)" stroke-width="1.6"/><path d="M12 7v5l3.5 2" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/></svg>近次全量匹配</span>
+            <span class="stat-card__value">1,842</span>
+            <span class="stat-card__delta">命中关联 <b>+37</b> · 耗时 76ms</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5" stroke="var(--primary)" stroke-width="1.6" stroke-linejoin="round"/></svg>SQL 下推率</span>
+            <span class="stat-card__value">92%</span>
+            <span class="stat-card__delta">未下推条件走内存求值兜底</span>
+          </div>
         </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>船公司</th><th>船名 / 航次</th><th>航线</th><th>ETD</th><th>ETA</th>
-              <th>箱型</th><th class="num">舱位(总/余)</th><th class="num">成本价</th><th class="num">销售价</th><th>操作</th>
-            </tr></thead>
-            <tbody id="tb-schedules"></tbody>
-          </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="dash-grid">
+          <div class="block">
+            <div class="block__title">各资源类型数量分布 <span class="sub">近 30 天</span></div>
+            <div class="bar-row"><span>仓库</span><div class="bar-track"><div class="bar-fill" style="width:82%"></div></div><span class="num">96</span></div>
+            <div class="bar-row"><span>场站</span><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><span class="num">64</span></div>
+            <div class="bar-row"><span>码头</span><div class="bar-track"><div class="bar-fill" style="width:32%"></div></div><span class="num">33</span></div>
+            <div class="bar-row"><span>船舶</span><div class="bar-track"><div class="bar-fill" style="width:23%"></div></div><span class="num">25</span></div>
+          </div>
+          <div class="block">
+            <div class="block__title">高频标签 TOP5 <span class="sub">按关联资源数</span></div>
+            <div id="dashTopTags"></div>
+          </div>
         </div>
-        <div class="pager"><span>共 4 条</span>
-          <button class="pg" aria-label="上一页">‹</button><button class="pg cur">1</button><button class="pg" aria-label="下一页">›</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 报价管理 ===== -->
-    <section class="page" id="page-quotes">
-      <div class="page-title">报价管理</div>
-      <div class="card">
-        <div class="toolbar">
-          <label>客户</label>
-          <select id="f-qcust" style="width:160px" onchange="renderQuotes()">
-            <option value="">全部</option><option>环球贸易有限公司</option>
-          </select>
-          <label>状态</label>
-          <select id="f-qstatus" style="width:120px" onchange="renderQuotes()">
-            <option value="">全部</option><option>DRAFT 草稿</option><option>SENT 已报出</option><option>ACCEPTED 已接受</option><option>LOST 已落空</option>
-          </select>
-          <div class="grow"></div>
-          <button class="btn btn-primary" aria-label="新建报价" onclick="openQuoteNew()">＋ 新建报价</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>报价单号</th><th>客户</th><th>船期摘要</th><th>箱型行</th><th class="num">总额(USD)</th><th>状态</th><th>经手人</th><th>操作</th>
-            </tr></thead>
-            <tbody id="tb-quotes"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 订舱单列表 ===== -->
-    <section class="page" id="page-bookings">
-      <div class="page-title">订舱单</div>
-      <div class="card">
-        <div class="toolbar">
-          <label>单号</label><input placeholder="B2026…" style="width:150px" oninput="renderBookings()">
-          <label>状态</label>
-          <select id="f-bstatus" style="width:140px" onchange="renderBookings()">
-            <option value="">全部</option><option>DRAFT 草稿</option><option>SUBMITTED 已提交</option><option>CONFIRMED 已确认</option><option>CANCELLED 已撤销</option>
-          </select>
-          <div class="grow"></div>
-          <button class="btn" aria-label="从报价生成" onclick="switchPage('quotes')">从已接受报价生成</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>订舱单号</th><th>客户</th><th>船期摘要</th><th>箱型行</th><th>状态</th><th>SO 号</th><th>截单 / 截港</th><th>经手人</th><th>操作</th>
-            </tr></thead>
-            <tbody id="tb-bookings"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 往来单位档案 ===== -->
-    <section class="page" id="page-parties">
-      <div class="page-title">往来单位档案</div>
-      <div class="card">
-        <div class="toolbar">
-          <label>关键词</label><input id="f-pkey" placeholder="名称 / 联系人 / 电话" style="width:200px" oninput="renderParties()">
-          <div class="grow"></div>
-        </div>
-        <div class="accordion" id="acc-parties"></div>
-      </div>
-    </section>
-
-    <!-- ===== 用户与角色 ===== -->
-    <section class="page" id="page-users">
-      <div class="page-title">用户与角色</div>
-      <div class="card">
-        <div class="toolbar">
-          <div class="grow"></div>
-          <button class="btn btn-primary" aria-label="新建用户" onclick="openModal('modal-user')">＋ 新建用户</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>用户名</th><th>显示名</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+        <div class="block">
+          <div class="block__title">最近操作 <span class="sub">审计留痕样例</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:720px;">
+            <thead><tr><th class="data-table__cell">时间</th><th class="data-table__cell">操作人</th><th class="data-table__cell">动作</th><th class="data-table__cell">对象</th><th class="data-table__cell">结果</th></tr></thead>
             <tbody>
-              <tr><td>zhaoming</td><td>赵明</td><td><span class="tag tag-blue">销售 SALES</span></td><td><span class="tag tag-green">启用</span></td><td class="num">2026-10-13 09:00</td>
-                <td><button class="link-btn" onclick="toast('已重置口令（日志只记「已变更」）')">重置口令</button><button class="link-btn danger" onclick="toast('不能停用：无此限制时可停用','warn')">停用</button></td></tr>
-              <tr><td>caozuo</td><td>操作员</td><td><span class="tag tag-orange">操作 OPS</span></td><td><span class="tag tag-green">启用</span></td><td class="num">2026-10-13 09:00</td>
-                <td><button class="link-btn" onclick="toast('已重置口令（日志只记「已变更」）')">重置口令</button><button class="link-btn danger" onclick="toast('已停用，历史单据保留显示名快照')">停用</button></td></tr>
-              <tr><td>admin</td><td>管理员</td><td><span class="tag tag-red">管理员 ADMIN</span></td><td><span class="tag tag-green">启用</span></td><td class="num">2026-10-13 09:00</td>
-                <td><button class="link-btn" onclick="toast('已重置口令（日志只记「已变更」）')">重置口令</button><button class="link-btn danger" onclick="toast('拒绝：不能停用自己，且系统须保留至少 1 名启用管理员','err')">停用</button></td></tr>
+              <tr><td class="data-table__cell">10-15 09:42</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">发布标签</span></td><td class="data-table__cell"><span class="data-table__content">A级-战略级仓</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+              <tr><td class="data-table__cell">10-15 09:40</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">修改规则</span></td><td class="data-table__cell"><span class="data-table__content">冷链仓</span></td><td class="data-table__cell"><span class="status-tag status-tag--warning">待重新匹配</span></td></tr>
+              <tr><td class="data-table__cell">10-15 09:12</td><td class="data-table__cell"><span class="data-table__content">李媛</span></td><td class="data-table__cell"><span class="data-table__content">导入资源</span></td><td class="data-table__cell"><span class="data-table__content">仓库 × 24</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
-      </div>
-      <div class="card">
-        <div class="sub-title" style="margin-top:0">权限矩阵速览</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>功能</th><th>销售</th><th>操作</th><th>管理员</th></tr></thead>
-            <tbody>
-              <tr><td>船期 / 舱位 / 运价维护</td><td>—</td><td>✅</td><td>✅</td></tr>
-              <tr><td>四份档案维护</td><td>—</td><td>✅</td><td>✅</td></tr>
-              <tr><td>报价（建/发/结）</td><td>✅</td><td>—</td><td>✅</td></tr>
-              <tr><td>订舱单（建/改/提交）</td><td>✅</td><td>—</td><td>✅</td></tr>
-              <tr><td>撤单</td><td>✅</td><td>✅</td><td>✅</td></tr>
-              <tr><td>录入 SO 回执</td><td>—</td><td>✅</td><td>✅</td></tr>
-              <tr><td>操作日志 / 用户管理</td><td>—</td><td>—</td><td>✅</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===== 操作日志 ===== -->
-    <section class="page" id="page-logs">
-      <div class="page-title">操作日志</div>
-      <div class="card">
-        <div class="toolbar">
-          <label>操作人</label>
-          <select style="width:120px"><option>全部</option><option>赵明</option><option>操作员</option><option>管理员</option></select>
-          <label>对象类型</label>
-          <select style="width:130px"><option>全部</option><option>QUOTE 报价</option><option>BOOKING 订舱单</option><option>SCHEDULE 船期</option><option>USER 用户</option></select>
-          <label>时间</label><input type="date" style="width:140px"><span style="color:var(--text-3)">至</span><input type="date" style="width:140px">
-          <div class="grow"></div>
-          <button class="btn" aria-label="查询日志">查询</button>
+      <!-- ===== 页面：资源台账 ===== -->
+      <section class="page" id="page-resource-list" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:160px;" placeholder="资源名称 / 编码" id="resKw"></span>
+            <span class="cond"><label>资源类型</label>
+              <select class="select select-sm" id="resType"><option value="">全部</option><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></span>
+            <span class="cond"><label>运营状态</label>
+              <select class="select select-sm"><option value="">全部</option><option>运营中</option><option>建设中</option><option>停用</option></select></span>
+            <span class="cond"><label>所属区域</label>
+              <select class="select select-sm"><option value="">全部</option><option>湖北</option><option>湖南</option><option>河南</option></select></span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="resSearch">查询</button>
+            <button class="btn btn-default btn-sm" data-act="resReset">重置</button>
+            <button class="btn btn-primary btn-sm" data-act="resNew">＋ 新建资源</button>
+            <button class="btn btn-default btn-sm" data-act="resImport">批量导入</button>
+          </div>
         </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>变更前后值</th><th>来源 IP</th></tr></thead>
-            <tbody>
-              <tr><td class="num">2026-10-13 10:21:05</td><td>赵明</td><td><span class="tag tag-green">BOOKING_SUBMIT</span></td><td>订舱单 B20261013001</td><td><button class="link-btn" onclick="openModal('modal-logdetail')">查看 JSON</button></td><td class="num">10.8.24.13</td></tr>
-              <tr><td class="num">2026-10-13 10:18:47</td><td>赵明</td><td><span class="tag tag-green">QUOTE_ACCEPT</span></td><td>报价 Q20261013001</td><td>status: SENT → ACCEPTED</td><td class="num">10.8.24.13</td></tr>
-              <tr><td class="num">2026-10-13 10:15:32</td><td>赵明</td><td><span class="tag tag-orange">QUOTE_UPDATE</span></td><td>报价 Q20261013001</td><td>sell_price: 1700 → 2200（改价低于成本价已被后端拒绝一次）</td><td class="num">10.8.24.13</td></tr>
-              <tr><td class="num">2026-10-13 09:47:10</td><td>操作员</td><td><span class="tag tag-blue">SCHEDULE_UPDATE</span></td><td>船期 COSCO SHIPPING STAR/008W</td><td>eta: 2026-11-16 → 2026-11-17</td><td class="num">10.8.24.51</td></tr>
-              <tr><td class="num">2026-10-13 09:30:02</td><td>管理员</td><td><span class="tag tag-red">USER_RESET_PWD</span></td><td>用户 caozuo</td><td>password: <b>***（已变更，不记录值）</b></td><td class="num">10.8.24.7</td></tr>
-              <tr><td class="num">2026-10-13 09:02:41</td><td>赵明</td><td><span class="tag tag-gray">LOGIN</span></td><td>—</td><td>登录成功</td><td class="num">10.8.24.13</td></tr>
-            </tbody>
-          </table>
+        <div class="block">
+          <div class="block__title">资源列表 <span class="sub" id="resScope">数据范围：华中区域及下级单位</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:960px;" id="resTable">
+            <thead><tr>
+              <th class="data-table__cell">资源名称</th><th class="data-table__cell">资源类型</th><th class="data-table__cell">仓库类型</th>
+              <th class="data-table__cell">面积（㎡）</th><th class="data-table__cell">权属</th><th class="data-table__cell">运营状态</th>
+              <th class="data-table__cell">所属区域</th><th class="data-table__cell">管理主体</th><th class="data-table__cell">标签</th><th class="data-table__cell">操作</th>
+            </tr></thead>
+            <tbody id="resTbody"></tbody>
+          </table></div>
+          <div class="table-footer"><span>共 218 条 · 每页 20 条</span>
+            <button class="page-btn">‹</button><button class="page-btn is-current">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">…</button><button class="page-btn">›</button>
+          </div>
         </div>
-        <div class="pager"><span>共 6 条</span>
-          <button class="pg" aria-label="上一页">‹</button><button class="pg cur">1</button><button class="pg" aria-label="下一页">›</button>
-        </div>
-      </div>
-    </section>
+      </section>
 
+      <!-- ===== 页面：资源类型与属性 ===== -->
+      <section class="page" id="page-meta-type" hidden>
+        <div class="block">
+          <div class="block__title">资源类型 <span class="sub">元数据驱动：字段集合以数据形式维护，新增属性零 DDL</span>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;" data-act="typeNew">＋ 新建资源类型</button></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:720px;">
+            <thead><tr><th class="data-table__cell">类型编码</th><th class="data-table__cell">类型名称</th><th class="data-table__cell">属性数</th><th class="data-table__cell">资源数</th><th class="data-table__cell">状态</th><th class="data-table__cell">操作</th></tr></thead>
+            <tbody>
+              <tr><td class="data-table__cell">WAREHOUSE</td><td class="data-table__cell"><span class="data-table__content">仓库</span></td><td class="data-table__cell">9</td><td class="data-table__cell">96</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
+              <tr><td class="data-table__cell">YARD</td><td class="data-table__cell"><span class="data-table__content">场站</span></td><td class="data-table__cell">7</td><td class="data-table__cell">64</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
+              <tr><td class="data-table__cell">WHARF</td><td class="data-table__cell"><span class="data-table__content">码头</span></td><td class="data-table__cell">6</td><td class="data-table__cell">33</td><td class="data-table__cell"><span class="status-tag status-tag--success">启用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
+              <tr><td class="data-table__cell">VESSEL</td><td class="data-table__cell"><span class="data-table__content">船舶</span></td><td class="data-table__cell">6</td><td class="data-table__cell">25</td><td class="data-table__cell"><span class="status-tag status-tag--gray">停用</span></td><td class="data-table__cell"><button class="link-btn" data-act="attrManage">管理属性</button><button class="link-btn">编辑</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="block">
+          <div class="block__title">「仓库」类型的属性清单 <span class="sub">前两个为固定物理列，其余走 JSON 扩展字段</span>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;" data-act="attrNew">＋ 新增属性</button></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:820px;">
+            <thead><tr><th class="data-table__cell">属性编码</th><th class="data-table__cell">属性名称</th><th class="data-table__cell">数据类型</th><th class="data-table__cell">可选值</th><th class="data-table__cell">单位</th><th class="data-table__cell">存储方式</th><th class="data-table__cell">必填</th><th class="data-table__cell">操作</th></tr></thead>
+            <tbody>
+              <tr><td class="data-table__cell">ownership</td><td class="data-table__cell"><span class="data-table__content">权属</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">自有 / 租赁 / 合作</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag">固定列</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button></td></tr>
+              <tr><td class="data-table__cell">operation_status</td><td class="data-table__cell"><span class="data-table__content">运营状态</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">运营中 / 建设中 / 停用</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag">固定列</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button></td></tr>
+              <tr><td class="data-table__cell">warehouse_type</td><td class="data-table__cell"><span class="data-table__content">仓库类型</span></td><td class="data-table__cell">枚举</td><td class="data-table__cell">普货 / 冷链 / 危化品 / 保税 / 智能</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
+              <tr><td class="data-table__cell">area</td><td class="data-table__cell"><span class="data-table__content">面积</span></td><td class="data-table__cell">数值</td><td class="data-table__cell">—</td><td class="data-table__cell">㎡</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">是</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
+              <tr><td class="data-table__cell">capacity</td><td class="data-table__cell"><span class="data-table__content">容量</span></td><td class="data-table__cell">数值</td><td class="data-table__cell">—</td><td class="data-table__cell">TEU</td><td class="data-table__cell"><span class="status-tag status-tag--gray">扩展 JSON</span></td><td class="data-table__cell">否</td><td class="data-table__cell"><button class="link-btn">编辑</button><button class="link-btn danger">删除</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ===== 页面：标签管理 ===== -->
+      <section class="page" id="page-tag-list" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>关键字</label><input class="input input-sm" style="width:160px;" placeholder="标签名称"></span>
+            <span class="cond"><label>标签类型</label>
+              <select class="select select-sm"><option value="">全部</option><option>分类标签</option><option>分级标签</option></select></span>
+            <span class="cond"><label>状态</label>
+              <select class="select select-sm"><option value="">全部</option><option>草稿</option><option>生效中</option><option>已失效</option><option>已停用</option></select></span>
+            <span class="cond"><label>作用范围</label>
+              <select class="select select-sm"><option value="">全部</option><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="tagSearch">查询</button>
+            <button class="btn btn-primary btn-sm" data-act="tagNew">＋ 新建标签</button>
+          </div>
+        </div>
+        <div class="block">
+          <div class="block__title">标签列表 <span class="sub">生命周期：草稿 → 生效中 → 已失效 / 已停用 · 发布即触发全量匹配</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:1060px;" id="tagTable">
+            <thead><tr>
+              <th class="data-table__cell">标签名称</th><th class="data-table__cell">类型</th><th class="data-table__cell">作用范围</th>
+              <th class="data-table__cell">规则摘要</th><th class="data-table__cell">发布单位</th><th class="data-table__cell">生效期</th>
+              <th class="data-table__cell">状态</th><th class="data-table__cell">关联资源</th><th class="data-table__cell" style="width:230px;">操作</th>
+            </tr></thead>
+            <tbody id="tagTbody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ===== 页面：打标规则配置 ===== -->
+      <section class="page" id="page-rule-config" hidden>
+        <div class="block">
+          <div class="block__title">规则编辑 <span class="sub">一个标签只有一条生效规则（ADR-0012）· 条件支持 AND / OR 嵌套</span></div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-item">
+              <label>作用标签 <span class="req">*</span></label>
+              <select class="select" id="ruleTag">
+                <option value="t-cold">冷链仓（分类 · 生效中）</option>
+                <option value="t-bonded">保税仓（分类 · 生效中）</option>
+                <option value="t-gradea">A级-战略级仓（分级 · 生效中）</option>
+                <option value="t-smart">智能仓（分类 · 草稿）</option>
+              </select>
+              <span class="hint">切换标签后加载其当前规则</span>
+            </div>
+            <div class="form-item">
+              <label>规则名称</label>
+              <input class="input" id="ruleName" value="冷链大仓识别">
+              <span class="hint">可选，便于界面展示</span>
+            </div>
+          </div>
+          <div class="ai-box" style="margin-bottom:14px;">
+            <div class="ai-box__head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2 14.5 9 21.5 11.5 14.5 14 12 21 9.5 14 2.5 11.5 9.5 9 12 2Z" fill="var(--primary)"/></svg>
+              AI 自然语言转规则 <span class="ai-badge">服务可用</span>
+            </div>
+            <textarea class="input ai-textarea" id="aiText" placeholder="例：把仓库类型是冷链、面积 5000 平米以上，或者权属是自有的仓库找出来">仓库类型是冷链并且面积不小于5000平米，或者权属是自有</textarea>
+            <div class="ai-chip-row">
+              <span class="ai-chip" data-ai="面积大于等于5000平方米的仓库">示例：面积门槛</span>
+              <span class="ai-chip" data-ai="权属是自有或者合作的码头">示例：多值属于</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" data-act="aiTransfer">转成规则</button>
+              <button class="btn btn-default btn-sm" data-act="aiDry">仅预览（不写入编辑器）</button>
+            </div>
+          </div>
+          <div class="rule-builder" id="ruleBuilder"></div>
+          <div class="rb-preview" id="rulePreview"></div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button class="btn btn-primary" data-act="ruleSave">保存规则</button>
+            <button class="btn btn-primary is-plain" data-act="ruleDry">规则试跑（不写库）</button>
+            <button class="btn btn-default" data-act="ruleEmpty">演示：空条件组校验</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 页面：自动匹配任务 ===== -->
+      <section class="page" id="page-match-task" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>触发方式</label>
+              <select class="select select-sm"><option value="">全部</option><option>发布触发</option><option>手动全量</option><option>规则变更</option><option>定时扫描</option></select></span>
+            <span class="cond"><label>时间</label><input class="input input-sm" type="date" value="2026-10-15" style="width:140px;"></span>
+          </div>
+          <div class="filter-bar__actions">
+            <button class="btn btn-primary btn-sm" data-act="matchRun">▶ 触发全量匹配</button>
+          </div>
+        </div>
+        <div class="block" id="matchRunBlock" hidden>
+          <div class="block__title">正在执行全量匹配 <span class="sub" id="matchRunLabel">扫描作用范围内的资源…</span></div>
+          <div class="progress"><div class="progress__fill" id="matchProgress" style="width:0%"></div></div>
+        </div>
+        <div class="block">
+          <div class="block__title">匹配任务列表</div>
+          <div class="table-scroll"><table class="data-table" style="min-width:900px;">
+            <thead><tr><th class="data-table__cell">任务号</th><th class="data-table__cell">触发方式</th><th class="data-table__cell">标签</th><th class="data-table__cell">扫描资源</th><th class="data-table__cell">新增关联</th><th class="data-table__cell">解除关联</th><th class="data-table__cell">耗时</th><th class="data-table__cell">下推率</th><th class="data-table__cell">状态</th><th class="data-table__cell">操作</th></tr></thead>
+            <tbody>
+              <tr><td class="data-table__cell">M-20261015-003</td><td class="data-table__cell"><span class="data-table__content">发布触发</span></td><td class="data-table__cell"><span class="data-table__content">A级-战略级仓</span></td><td class="data-table__cell">96</td><td class="data-table__cell"><b style="color:var(--success);">+8</b></td><td class="data-table__cell">0</td><td class="data-table__cell">88ms</td><td class="data-table__cell">100%</td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td><td class="data-table__cell"><button class="link-btn" data-act="matchDetail">详情</button></td></tr>
+              <tr><td class="data-table__cell">M-20261015-002</td><td class="data-table__cell"><span class="data-table__content">规则变更</span></td><td class="data-table__cell"><span class="data-table__content">冷链仓</span></td><td class="data-table__cell">96</td><td class="data-table__cell"><b style="color:var(--success);">+5</b></td><td class="data-table__cell">2</td><td class="data-table__cell">76ms</td><td class="data-table__cell">0%（内存求值）</td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td><td class="data-table__cell"><button class="link-btn" data-act="matchDetail">详情</button></td></tr>
+              <tr><td class="data-table__cell">M-20261014-011</td><td class="data-table__cell"><span class="data-table__content">定时扫描</span></td><td class="data-table__cell"><span class="data-table__content">全部生效标签</span></td><td class="data-table__cell">218</td><td class="data-table__cell">0</td><td class="data-table__cell">3</td><td class="data-table__cell">142ms</td><td class="data-table__cell">92%</td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td><td class="data-table__cell"><button class="link-btn" data-act="matchDetail">详情</button></td></tr>
+              <tr><td class="data-table__cell">M-20261014-007</td><td class="data-table__cell"><span class="data-table__content">手动全量</span></td><td class="data-table__cell"><span class="data-table__content">集装箱码头</span></td><td class="data-table__cell">33</td><td class="data-table__cell">0</td><td class="data-table__cell">0</td><td class="data-table__cell">—</td><td class="data-table__cell">—</td><td class="data-table__cell"><span class="status-tag status-tag--danger">失败</span></td><td class="data-table__cell"><button class="link-btn" data-act="matchFail">原因</button></td></tr>
+            </tbody>
+          </table></div>
+          <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">※ 下推率为观测指标：条件可翻译为 SQL 时由数据库过滤（快），否则回退内存求值并保证结果口径一致（ADR-0014）。</p>
+        </div>
+      </section>
+
+      <!-- ===== 页面：标签查询 ===== -->
+      <section class="page" id="page-query-center" hidden>
+        <div class="block">
+          <div class="block__title">
+            <span class="check-chip is-on" data-qtab="byRes" role="tab" tabindex="0" aria-selected="true">按资源查标签</span>
+            <span class="check-chip" data-qtab="byTag" role="tab" tabindex="0" aria-selected="false">按标签查资源</span>
+          </div>
+          <div id="qtab-byRes">
+            <div class="filter-bar" style="box-shadow:none;border:1px solid var(--border-light);">
+              <div class="filter-bar__conditions">
+                <span class="cond"><label>选择资源</label>
+                  <select class="select select-sm" id="qResSel" style="width:280px;"></select></span>
+              </div>
+              <div class="filter-bar__actions"><button class="btn btn-primary btn-sm" data-act="qResGo">查询标签</button></div>
+            </div>
+            <div id="qResResult" style="margin-top:12px;"></div>
+          </div>
+          <div id="qtab-byTag" hidden>
+            <div class="filter-bar" style="box-shadow:none;border:1px solid var(--border-light);">
+              <div class="filter-bar__conditions">
+                <span class="cond"><label>选择标签</label>
+                  <select class="select select-sm" id="qTagSel" style="width:280px;"></select></span>
+                <span class="cond"><label>只看生效关联</label>
+                  <select class="select select-sm" id="qTagActive"><option value="1">是</option><option value="0">否（含历史/人工抑制）</option></select></span>
+              </div>
+              <div class="filter-bar__actions"><button class="btn btn-primary btn-sm" data-act="qTagGo">查询资源</button></div>
+            </div>
+            <div id="qTagResult" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 页面：操作审计 ===== -->
+      <section class="page" id="page-audit-log" hidden>
+        <div class="filter-bar">
+          <div class="filter-bar__conditions">
+            <span class="cond"><label>操作人</label><input class="input input-sm" style="width:120px;" placeholder="姓名"></span>
+            <span class="cond"><label>动作</label>
+              <select class="select select-sm"><option value="">全部</option><option>发布标签</option><option>修改规则</option><option>批量匹配</option><option>删除资源</option></select></span>
+            <span class="cond"><label>日期</label><input class="input input-sm" type="date" style="width:140px;"></span>
+          </div>
+          <div class="filter-bar__actions"><button class="btn btn-primary btn-sm">查询</button></div>
+        </div>
+        <div class="block">
+          <div class="block__title">操作日志 <span class="sub">发布标签 / 规则变更 / 批量匹配三个高影响动作强制留痕（S6）</span></div>
+          <div class="table-scroll"><table class="data-table" style="min-width:860px;">
+            <thead><tr><th class="data-table__cell">时间</th><th class="data-table__cell">操作人</th><th class="data-table__cell">动作</th><th class="data-table__cell">对象类型</th><th class="data-table__cell">对象</th><th class="data-table__cell">明细摘要</th><th class="data-table__cell">结果</th></tr></thead>
+            <tbody>
+              <tr><td class="data-table__cell">2026-10-15 09:42:17</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">发布标签</span></td><td class="data-table__cell">tag</td><td class="data-table__cell"><span class="data-table__content">A级-战略级仓</span></td><td class="data-table__cell"><span class="data-table__content">触发全量匹配 M-20261015-003，新增关联 8</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+              <tr><td class="data-table__cell">2026-10-15 09:40:03</td><td class="data-table__cell"><span class="data-table__content">屈越</span></td><td class="data-table__cell"><span class="data-table__content">修改规则</span></td><td class="data-table__cell">tag_rule</td><td class="data-table__cell"><span class="data-table__content">冷链仓</span></td><td class="data-table__cell"><span class="data-table__content">面积阈值 3000 → 5000，待重新匹配</span></td><td class="data-table__cell"><span class="status-tag status-tag--warning">已生效未重算</span></td></tr>
+              <tr><td class="data-table__cell">2026-10-15 09:12:44</td><td class="data-table__cell"><span class="data-table__content">李媛</span></td><td class="data-table__cell"><span class="data-table__content">导入资源</span></td><td class="data-table__cell">resource</td><td class="data-table__cell"><span class="data-table__content">仓库 × 24</span></td><td class="data-table__cell"><span class="data-table__content">逐行数据范围校验通过</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+              <tr><td class="data-table__cell">2026-10-14 18:05:31</td><td class="data-table__cell"><span class="data-table__content">王强</span></td><td class="data-table__cell"><span class="data-table__content">删除资源</span></td><td class="data-table__cell">resource</td><td class="data-table__cell"><span class="data-table__content">沙洋普通仓库（试点）</span></td><td class="data-table__cell"><span class="data-table__content">含 2 条标签关联一并解除</span></td><td class="data-table__cell"><span class="status-tag status-tag--success">成功</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </section>
+
+    </div>
   </main>
 </div>
 
-<!-- ============ 弹窗：船期详情 ============ -->
-<div class="modal-mask" id="modal-schedetail" role="dialog" aria-modal="true" aria-label="船期详情">
-  <div class="modal">
-    <div class="modal-head"><h3>船期详情</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-schedetail')">✕</button></div>
-    <div class="modal-body">
-      <dl class="desc">
-        <dt>船公司</dt><dd>中远海运</dd><dt>船名 / 航次</dt><dd>COSCO SHIPPING STAR / 008W</dd>
-        <dt>航线</dt><dd>QINGDAO → HAMBURG</dd><dt>ETD / ETA</dt><dd class="num">2026-10-15 / 2026-11-17</dd>
-      </dl>
-      <div class="sub-title">箱型 · 舱位 · 运价 <span class="tag tag-gray">报价不占舱 · 提交才扣舱</span></div>
-      <table>
-        <thead><tr><th>箱型</th><th class="num">总量</th><th class="num">已订</th><th class="num">剩余</th><th class="num">成本价(USD)</th><th class="num">销售价(USD)</th><th>操作</th></tr></thead>
-        <tbody>
-          <tr><td>40HQ</td><td class="num">10</td><td class="num">1</td><td class="num"><b style="color:var(--success)">9</b></td><td class="num">1,800.00</td><td class="num">2,200.00</td>
-            <td><button class="link-btn" onclick="toast('销售价不得低于成本价（后端强制）','warn')">调价</button></td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:12px;color:var(--text-3);margin-top:10px">· 舱位总量不得改到低于已订量（BR-SCHED-06）；船期被引用后不可删除（BR-SCHED-07）</p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-schedetail')">关闭</button>
-      <button class="btn" onclick="toast('已保存，修改进操作日志')">修改描述字段</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-schedetail');switchPage('quotes');openQuoteNew()">就此船期报价</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：新建船期 ============ -->
-<div class="modal-mask" id="modal-schedule" role="dialog" aria-modal="true" aria-label="新建船期">
-  <div class="modal">
-    <div class="modal-head"><h3>新建船期</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-schedule')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-item"><label>船公司<span class="req">*</span></label><input placeholder="如 中远海运"></div>
-        <div class="form-item"><label>船名<span class="req">*</span></label><input placeholder="如 COSCO SHIPPING ARIES"></div>
-        <div class="form-item"><label>航次号<span class="req">*</span></label><input placeholder="如 021W"></div>
-        <div class="form-item"><label>起运港<span class="req">*</span></label><input value="QINGDAO"></div>
-        <div class="form-item"><label>目的港<span class="req">*</span></label><input placeholder="如 ROTTERDAM"></div>
-        <div class="form-item"><label>箱型<span class="req">*</span></label><select><option>40HQ</option><option>20GP</option><option>40GP</option><option>45HQ</option></select></div>
-        <div class="form-item"><label>ETD<span class="req">*</span></label><input type="date"></div>
-        <div class="form-item"><label>ETA<span class="req">*</span></label><input type="date"></div>
-        <div class="form-item"><label>舱位总量<span class="req">*</span></label><input type="number" min="1" placeholder="正整数"></div>
-        <div class="form-item"><label>成本价 (USD)<span class="req">*</span></label><input type="number" step="0.01" min="0"></div>
-        <div class="form-item full"><label>销售价 (USD)<span class="req">*</span>　<span style="color:var(--text-3);font-weight:400">不得低于成本价，缺一不可（BR-SCHED-03/04）</span></label><input type="number" step="0.01" min="0"></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-schedule')">取消</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-schedule');toast('船期已创建（船公司+船名+航次+港+ETD 唯一）')">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：报价详情 / 新建报价 ============ -->
-<div class="modal-mask" id="modal-quote" role="dialog" aria-modal="true" aria-label="报价">
-  <div class="modal wide">
-    <div class="modal-head"><h3 id="quote-modal-title">报价详情</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-quote')">✕</button></div>
-    <div class="modal-body" id="quote-modal-body"></div>
-    <div class="modal-foot" id="quote-modal-foot"></div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：订舱单详情 ============ -->
-<div class="modal-mask" id="modal-booking" role="dialog" aria-modal="true" aria-label="订舱单详情">
-  <div class="modal wide">
-    <div class="modal-head"><h3>订舱单详情 <span class="tag tag-blue" style="vertical-align:2px">B20261013001</span></h3>
-      <button class="x" aria-label="关闭" onclick="closeModal('modal-booking')">✕</button></div>
-    <div class="modal-body">
-      <div class="steps">
-        <div class="step done"><span class="dot">✓</span>草稿</div><div class="step-line done"></div>
-        <div class="step done"><span class="dot">✓</span>已提交（扣舱）</div><div class="step-line"></div>
-        <div class="step cur"><span class="dot">3</span>待确认</div><div class="step-line"></div>
-        <div class="step"><span class="dot">4</span>已确认</div>
-      </div>
-      <dl class="desc">
-        <dt>客户</dt><dd>环球贸易有限公司</dd><dt>来源报价</dt><dd>Q20261013001（已接受）</dd>
-        <dt>船期</dt><dd>COSCO SHIPPING STAR / 008W · QINGDAO → HAMBURG · ETD 2026-10-15</dd><dt>经手人</dt><dd>赵明</dd>
-        <dt>发货人</dt><dd>QINGDAO INTERNATIONAL TRADE CO., LTD.</dd><dt>收货人</dt><dd>Hans Schmidt</dd>
-        <dt>通知人</dt><dd><span class="tag tag-gray">同收货人</span>（留空即显式标注，不做隐式默认）</dd><dt>SO 回执</dt><dd style="color:var(--text-3)">待操作录入 SO 号 / 截单 / 截港</dd>
-      </dl>
-      <div class="sub-title">箱型行 <span class="tag tag-gray">提交时须与报价逐行一致（BR-BOOK-05）</span></div>
-      <table><thead><tr><th>箱型</th><th class="num">数量</th></tr></thead>
-        <tbody><tr><td>40HQ</td><td class="num">1</td></tr></tbody></table>
-      <div class="sub-title">货物行</div>
-      <table><thead><tr><th>唛头</th><th>品名</th><th class="num">件数</th><th class="num">毛重(kg)</th><th class="num">体积(m³)</th></tr></thead>
-        <tbody><tr><td>GLOBAL TRADING GERMANY MADE IN CHINA</td><td>OFFICE FURNITURE</td><td class="num">50</td><td class="num">8,500.00</td><td class="num">68.000</td></tr></tbody></table>
-    </div>
-    <div class="modal-foot no-print">
-      <button class="btn" onclick="closeModal('modal-booking')">关闭</button>
-      <button class="btn btn-danger" onclick="openCancel()">撤单（回滚舱位）</button>
-      <button class="btn" onclick="window.print()">打印 / 另存 PDF</button>
-      <button class="btn btn-primary" onclick="toast('仅操作(OPS)/管理员可录 SO 回执，切换 caozuo 体验','warn')">录入 SO 回执</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：撤单 ============ -->
-<div class="modal-mask" id="modal-cancel" role="dialog" aria-modal="true" aria-label="撤单确认">
-  <div class="modal" style="width:480px">
-    <div class="modal-head"><h3>撤单确认</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-cancel')">✕</button></div>
-    <div class="modal-body">
-      <p style="margin-bottom:12px">确认撤销订舱单 <b>B20261013001</b>？</p>
-      <ul style="font-size:13px;color:var(--text-2);padding-left:18px;margin-bottom:14px">
-        <li>所扣舱位（40HQ×1）将<b>全额回滚</b>；</li>
-        <li>撤单是<b>终态</b>，不可恢复（BR-SPACE-07）；</li>
-        <li>将记录撤销人、时间与本原因，并写入操作日志。</li>
-      </ul>
-      <div class="form-item"><label>撤销原因（可选）</label><textarea rows="2" placeholder="如：客户取消出货计划"></textarea></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-cancel')">取消</button>
-      <button class="btn btn-danger" onclick="closeModal('modal-cancel');closeModal('modal-booking');toast('已撤销，40HQ 剩余舱位 9 → 10（已订量 -1）')">确认撤单</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：档案编辑 ============ -->
-<div class="modal-mask" id="modal-party" role="dialog" aria-modal="true" aria-label="档案编辑">
-  <div class="modal">
-    <div class="modal-head"><h3 id="party-modal-title">编辑档案</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-party')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-item full"><label>名称<span class="req">*</span></label><input value="环球贸易有限公司"></div>
-        <div class="form-item full"><label>地址</label><input value="山东省青岛市市南区香港中路 100 号"></div>
-        <div class="form-item"><label>联系人</label><input value="王女士"></div>
-        <div class="form-item"><label>电话</label><input value="+86-532-8888 6666"></div>
-        <div class="form-item"><label>邮箱</label><input value="wang@globaltrading.cn"></div>
-      </div>
-      <p style="font-size:12px;color:var(--text-3);margin-top:10px">被订舱单引用的档案删除将被拒绝，并报出引用单号（BR-PARTY-02）。</p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-party')">取消</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-party');toast('档案已保存，写入操作日志（含前后值）')">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：新建用户 ============ -->
-<div class="modal-mask" id="modal-user" role="dialog" aria-modal="true" aria-label="新建用户">
-  <div class="modal" style="width:520px">
-    <div class="modal-head"><h3>新建用户</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-user')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-item"><label>用户名<span class="req">*</span></label><input placeholder="3-32 字符，全局唯一"></div>
-        <div class="form-item"><label>显示名<span class="req">*</span></label><input></div>
-        <div class="form-item"><label>角色<span class="req">*</span></label><select><option>销售 SALES</option><option>操作 OPS</option><option>管理员 ADMIN</option></select></div>
-        <div class="form-item"><label>初始口令<span class="req">*</span></label><input type="password" placeholder="8-64 字符"></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-user')">取消</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-user');toast('用户已创建；日志中口令字段只记「已变更」')">创建</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 弹窗：日志 JSON ============ -->
-<div class="modal-mask" id="modal-logdetail" role="dialog" aria-modal="true" aria-label="日志详情">
-  <div class="modal" style="width:560px">
-    <div class="modal-head"><h3>变更前后值（JSON）</h3><button class="x" aria-label="关闭" onclick="closeModal('modal-logdetail')">✕</button></div>
-    <div class="modal-body">
-<pre style="background:#1F2733;color:#D8E4F0;font-size:12px;padding:14px;border-radius:6px;overflow:auto">{
-  "booking_no": "B20261013001",
-  "action": "BOOKING_SUBMIT",
-  "changed_fields": {
-    "status":        { "before": "DRAFT",     "after": "SUBMITTED" },
-    "booked_slots":  { "before": 0,           "after": 1 }
-  },
-  "note": "整单原子扣舱；重复提交返回 409 不重复扣舱"
-}</pre>
-    </div>
-    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('modal-logdetail')">关闭</button></div>
-  </div>
-</div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- 弹窗/浮层挂载点 -->
+<div id="overlayRoot"></div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <script>
-/* ================= 种子数据（对应 Spec BR-SEED） ================= */
-var schedules=[
- {carrier:'中远海运',vessel:'COSCO SHIPPING STAR',voy:'008W',route:'QINGDAO → HAMBURG',etd:'2026-10-15',eta:'2026-11-17',
-  rows:[{type:'40HQ',total:10,booked:1,cost:1800,sell:2200}]},
- {carrier:'中远海运',vessel:'COSCO SHIPPING GEMINI',voy:'012E',route:'QINGDAO → HAMBURG',etd:'2026-10-27',eta:'2026-11-29',
-  rows:[{type:'40HQ',total:12,booked:0,cost:1750,sell:2150},{type:'20GP',total:20,booked:0,cost:1100,sell:1450}]},
- {carrier:'东方海外',vessel:'OOCL GERMANY',voy:'045W',route:'QINGDAO → HAMBURG',etd:'2026-11-12',eta:'2026-12-14',
-  rows:[{type:'40HQ',total:8,booked:0,cost:1820,sell:2260}]},
- {carrier:'中远海运',vessel:'COSCO SHIPPING ARIES',voy:'021W',route:'QINGDAO → ROTTERDAM',etd:'2026-12-12',eta:'2027-01-16',
-  rows:[{type:'40HQ',total:15,booked:0,cost:1780,sell:2180},{type:'20GP',total:30,booked:0,cost:1120,sell:1480}]}
+"use strict";
+/* ================= 模拟数据 ================= */
+const RESOURCES = [
+  {id:"R0001",name:"武汉阳逻保税仓储中心",type:"仓库",wType:"保税",area:68000,own:"自有",status:"运营中",region:"湖北 · 武汉",org:"华中区域公司",tags:[["t-bonded","保税仓","c","#0F65C1"],["t-gradea","A级-战略级仓","g","#FF7122"]],lat:"30.66",lng:"114.38"},
+  {id:"R0002",name:"长沙霞凝冷链物流园",type:"仓库",wType:"冷链",area:12300,own:"租赁",status:"运营中",region:"湖南 · 长沙",org:"长沙分公司",tags:[["t-cold","冷链仓","c","#009B40"],["t-gradeb","B级-重要级仓","g","#0F65C1"]]},
+  {id:"R0003",name:"郑州圃田集装箱场站",type:"场站",wType:"—",area:41000,own:"合作",status:"运营中",region:"河南 · 郑州",org:"郑州分公司",tags:[["t-container","集装箱堆场","c","#0F65C1"]]},
+  {id:"R0004",name:"武汉青山重件码头",type:"码头",wType:"—",area:15600,own:"自有",status:"运营中",region:"湖北 · 武汉",org:"华中区域公司",tags:[["t-wharf","重件码头","c","#0F65C1"],["t-gradea2","A级-战略级码头","g","#FF7122"]]},
+  {id:"R0005",name:"岳阳城陵矶普货仓库",type:"仓库",wType:"普货",area:3200,own:"租赁",status:"建设中",region:"湖南 · 岳阳",org:"长沙分公司",tags:[]},
+  {id:"R0006",name:"襄阳樊西智能立体仓",type:"仓库",wType:"智能",area:8600,own:"自有",status:"运营中",region:"湖北 · 襄阳",org:"华中区域公司",tags:[["t-smart","智能仓","c","#009B40"]]},
+  {id:"R0007",name:"宜昌三峡机场附近中转仓",type:"仓库",wType:"普货",area:1800,own:"合作",status:"停用",region:"湖北 · 宜昌",org:"华中区域公司",tags:[]},
+  {id:"R0008",name:"新乡危险品集装箱堆场",type:"场站",wType:"危化品",area:22400,own:"租赁",status:"运营中",region:"河南 · 新乡",org:"郑州分公司",tags:[["t-danger","危化品资质场站","c","#FF2222"]]}
 ];
-var quotes=[
- {no:'Q20261013001',cust:'环球贸易有限公司',sched:'COSCO SHIPPING STAR / 008W · QINGDAO→HAMBURG · ETD 2026-10-15',
-  lines:[{type:'40HQ',qty:1,price:2200}],total:2200,status:'ACCEPTED',by:'赵明'},
- {no:'Q20261013002',cust:'环球贸易有限公司',sched:'COSCO SHIPPING GEMINI / 012E · QINGDAO→HAMBURG · ETD 2026-10-27',
-  lines:[{type:'40HQ',qty:2,price:2150},{type:'20GP',qty:3,price:1450}],total:8650,status:'SENT',by:'赵明'},
- {no:'Q20261013003',cust:'环球贸易有限公司',sched:'OOCL GERMANY / 045W · QINGDAO→HAMBURG · ETD 2026-11-12',
-  lines:[{type:'40HQ',qty:1,price:1850}],total:1850,status:'DRAFT',by:'赵明'}
+const TAGS = [
+  {id:"t-cold",name:"冷链仓",type:"分类",scope:["仓库"],color:"#009B40",org:"华中区域公司",eff:"2026-08-01",exp:"2027-07-31",status:"EFFECTIVE",count:6,rule:"(仓库类型 = 冷链 AND 面积 >= 5000)",dirty:false},
+  {id:"t-bonded",name:"保税仓",type:"分类",scope:["仓库"],color:"#0F65C1",org:"华中区域公司",eff:"2026-08-01",exp:"2027-07-31",status:"EFFECTIVE",count:4,rule:"仓库类型 = 保税",dirty:false},
+  {id:"t-gradea",name:"A级-战略级仓",type:"分级",scope:["仓库"],color:"#FF7122",org:"华中区域公司",eff:"2026-10-15",exp:"2027-10-14",status:"EFFECTIVE",count:8,rule:"(面积 >= 50000 OR (仓库类型 = 保税 AND 权属 = 自有))",dirty:false},
+  {id:"t-gradeb",name:"B级-重要级仓",type:"分级",scope:["仓库"],color:"#0F65C1",org:"长沙分公司",eff:"2026-10-15",exp:"2027-10-14",status:"EFFECTIVE",count:12,rule:"面积 >= 10000",dirty:false},
+  {id:"t-smart",name:"智能仓",type:"分类",scope:["仓库"],color:"#009B40",org:"华中区域公司",eff:"—",exp:"—",status:"DRAFT",count:0,rule:"仓库类型 = 智能",dirty:false},
+  {id:"t-container",name:"集装箱堆场",type:"分类",scope:["场站"],color:"#0F65C1",org:"郑州分公司",eff:"2026-06-01",exp:"2026-09-30",status:"EXPIRED",count:9,rule:"资源类型 = 场站 AND 业务包含 集装箱",dirty:false},
+  {id:"t-wharf",name:"重件码头",type:"分类",scope:["码头"],color:"#0F65C1",org:"华中区域公司",eff:"2026-07-01",exp:"2027-06-30",status:"EFFECTIVE",count:5,rule:"码头类型 = 重件",dirty:false},
+  {id:"t-danger",name:"危化品资质场站",type:"分类",scope:["场站"],color:"#FF2222",org:"郑州分公司",eff:"2026-09-01",exp:"2027-08-31",status:"DISABLED",count:3,rule:"仓库类型 = 危化品",dirty:false},
+  {id:"t-gradea2",name:"A级-战略级码头",type:"分级",scope:["码头"],color:"#FF7122",org:"华中区域公司",eff:"2026-10-01",exp:"2027-09-30",status:"EFFECTIVE",count:2,rule:"吞吐能力 >= 100万吨",dirty:false}
 ];
-var bookings=[
- {no:'B20261013001',cust:'环球贸易有限公司',sched:'COSCO SHIPPING STAR / 008W · QINGDAO→HAMBURG',
-  lines:'40HQ×1',status:'SUBMITTED',so:'—',cutoff:'待录入',by:'赵明'},
- {no:'B20261013002',cust:'环球贸易有限公司',sched:'COSCO SHIPPING GEMINI / 012E · QINGDAO→HAMBURG',
-  lines:'40HQ×2、20GP×3',status:'CONFIRMED',so:'COSU6612880',cutoff:'2026-10-24 12:00 / 2026-10-25 16:00',by:'赵明'},
- {no:'B20261012007',cust:'环球贸易有限公司',sched:'OOCL GERMANY / 045W · QINGDAO→HAMBURG',
-  lines:'40HQ×1',status:'DRAFT',so:'—',cutoff:'—',by:'赵明'}
+const STATUS_MAP = {DRAFT:["草稿",""],EFFECTIVE:["生效中","status-tag--success"],EXPIRED:["已失效","status-tag--gray"],DISABLED:["已停用","status-tag--warning"]};
+const FIELDS = [
+  {code:"warehouse_type",name:"仓库类型",type:"enum",opts:["普货","冷链","危化品","保税","智能"]},
+  {code:"area",name:"面积",type:"number",unit:"㎡"},
+  {code:"capacity",name:"容量",type:"number",unit:"TEU"},
+  {code:"ownership",name:"权属",type:"enum",opts:["自有","租赁","合作"]},
+  {code:"operation_status",name:"运营状态",type:"enum",opts:["运营中","建设中","停用"]},
+  {code:"open_date",name:"投用日期",type:"date"}
 ];
-var parties={
- '客户 Customer':[{name:'环球贸易有限公司',contact:'王女士',phone:'+86-532-8888 6666',email:'wang@globaltrading.cn',addr:'山东省青岛市市南区香港中路 100 号'}],
- '发货人 Shipper':[{name:'QINGDAO INTERNATIONAL TRADE CO., LTD.',contact:'李经理',phone:'+86-532-8765 4321',email:'li@qdintl.cn',addr:'山东省青岛市香港中路 100 号国际大厦'}],
- '收货人 Consignee':[{name:'Hans Schmidt',contact:'Hans Schmidt',phone:'+49-40-1234 5678',email:'h.schmidt@de-hamburg.de',addr:'Hafenstraße 12, 20359 Hamburg, Germany'}],
- '通知人 Notify Party':[{name:'EU LOGISTICS GMBH',contact:'Anna Müller',phone:'+49-40-8765 4321',email:'anna@eulogistics.de',addr:'Speicherstadt 5, 20457 Hamburg, Germany'}]
-};
+const OPS = {EQ:{sym:"=",label:"等于",types:["enum","number","date","text"]},NE:{sym:"≠",label:"不等于",types:["enum","number","date","text"]},GT:{sym:">",label:"大于",types:["number","date"]},LT:{sym:"<",label:"小于",types:["number","date"]},GE:{sym:"≥",label:"大于等于",types:["number","date"]},LE:{sym:"≤",label:"小于等于",types:["number","date"]},CONTAINS:{sym:"∋",label:"包含",types:["enum","text"]},IN:{sym:"∈",label:"属于",types:["enum","number","text"]}};
 
-/* ================= 状态与路由 ================= */
-var ROLES={
- SALES:{name:'赵明',tag:'销售',pages:['schedules','quotes','bookings','parties']},
- OPS:{name:'操作员',tag:'操作',pages:['schedules','bookings','parties','logs']},
- ADMIN:{name:'管理员',tag:'管理员',pages:['schedules','quotes','bookings','parties','users','logs']}
-};
-var curRole='SALES', curPage='schedules';
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const svg={ok:'<svg class="t-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="m8.5 12.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+info:'<svg class="t-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8h.01M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+warn:'<svg class="t-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3 22 20H2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+err:'<svg class="t-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="m9 9 6 6m0-6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'};
 
-function doLogin(){
-  var u=document.getElementById('login-user').value.trim();
-  var p=document.getElementById('login-pass').value;
-  var map={zhaoming:'SALES',caozuo:'OPS',admin:'ADMIN'};
-  if(map[u]&&p==='demo1234'){
-    curRole=map[u];
-    document.getElementById('page-login').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('user-name').textContent=ROLES[curRole].name;
-    var rt=document.getElementById('user-role-tag');
-    rt.textContent=ROLES[curRole].tag;
-    rt.className='tag '+(curRole==='SALES'?'tag-blue':curRole==='OPS'?'tag-orange':'tag-red');
-    applyRoleMenu();
-    switchPage('schedules');
-    toast('欢迎，'+ROLES[curRole].name+'（'+ROLES[curRole].tag+'）');
+/* ================= toast ================= */
+function toast(msg,type="info",action){
+  const el=document.createElement("div");
+  el.className="toast-message toast-message--"+type;
+  el.innerHTML=(svg[type]||svg.info)+"<span>"+esc(msg)+"</span>";
+  if(action){const b=document.createElement("button");b.className="t-action";b.textContent=action.label;
+    b.onclick=()=>{action.onClick();el.remove();};el.appendChild(b);}
+  $("#toastWrap").appendChild(el);
+  setTimeout(()=>{el.style.opacity="0";el.style.transition="opacity 200ms";setTimeout(()=>el.remove(),220);},action?6000:2600);
+}
+
+/* ================= 弹窗 ================= */
+function openModal({title,body,foot,lg,onClose}){
+  const mask=document.createElement("div");mask.className="modal-mask";
+  mask.innerHTML=`<div class="modal${lg?" modal--lg":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="modal__head"><span class="modal__title">${esc(title)}</span><button class="modal__close" aria-label="关闭">✕</button></div>
+    <div class="modal__body"></div>${foot?'<div class="modal__foot"></div>':""}</div>`;
+  mask.querySelector(".modal__body").append(typeof body==="string"?Object.assign(document.createElement("div"),{innerHTML:body}):body);
+  if(foot)foot.forEach(b=>{const btn=document.createElement("button");btn.className="btn "+(b.cls||"btn-default");btn.textContent=b.label;
+    btn.onclick=()=>{if(b.onClick)b.onClick(mask);else close();};mask.querySelector(".modal__foot").appendChild(btn);});
+  const close=()=>{mask.remove();onClose&&onClose();};
+  mask.querySelector(".modal__close").onclick=close;
+  mask.addEventListener("mousedown",e=>{if(e.target===mask)close();});
+  document.addEventListener("keydown",function esc2(e){if(e.key==="Escape"){close();document.removeEventListener("keydown",esc2);}});
+  $("#overlayRoot").appendChild(mask);return {mask,close};
+}
+function confirmDialog({title="确认操作",html,okLabel="确认",danger=false,onOk}){
+  return openModal({title,cls:"",body:`<div style="font-size:14px;line-height:20px;">${html}</div>`,
+    foot:[{label:"取消"},{label:okLabel,cls:danger?"btn-danger":"btn-primary",onClick:m=>{m.remove();onOk&&onOk();}}],
+    onClose:()=>{}});
+}
+
+/* ================= 侧边栏 & 页签 ================= */
+const app=$("#app");
+function setCollapsed(c){app.classList.toggle("is-collapsed",c);$("#sidebarCollapse").setAttribute("aria-expanded",String(!c));
+  try{localStorage.setItem("sidebarCollapsed",c?"1":"0");}catch(e){}}
+try{if(localStorage.getItem("sidebarCollapsed")==="1")app.classList.add("is-collapsed");}catch(e){}
+$("#sidebarCollapse").onclick=()=>setCollapsed(!app.classList.contains("is-collapsed"));
+$("#topbarToggle").onclick=()=>{
+  if(window.innerWidth<=991){app.classList.toggle("is-mobile-open");}
+  else setCollapsed(!app.classList.contains("is-collapsed"));
+};
+/* 手风琴 */
+$$(".menu-item__parent.has-children").forEach(p=>{
+  p.addEventListener("click",()=>{
+    if(app.classList.contains("is-collapsed")&&window.innerWidth>991)return;
+    const grp=document.getElementById("grp-"+p.dataset.group);
+    const isOpen=grp.classList.contains("is-open");
+    $$(".menu-children.is-open").forEach(o=>{o.classList.remove("is-open");o.style.height="0px";});
+    $$(".menu-item__parent.is-open").forEach(o=>o.classList.remove("is-open"));
+    if(!isOpen){grp.classList.add("is-open");grp.style.height=grp.scrollHeight+"px";
+      setTimeout(()=>{if(grp.classList.contains("is-open"))grp.style.height="auto";},320);
+      p.classList.add("is-open");}
+    p.setAttribute("aria-expanded",String(!isOpen));
+  });
+});
+/* 收起态悬浮窗 */
+let popTimer=null,popEl=null;
+function closePopover(){clearTimeout(popTimer);popTimer=null;if(popEl){popEl.remove();popEl=null;}}
+$$(".menu-item__parent").forEach(p=>{
+  p.addEventListener("mouseenter",()=>{
+    if(!app.classList.contains("is-collapsed")||window.innerWidth<=991||app.classList.contains("is-resizing-sidebar"))return;
+    popTimer=setTimeout(()=>{
+      closePopover();
+      popEl=document.createElement("div");popEl.className="menu-popover";
+      const title=document.createElement("div");title.className="menu-popover__title";
+      title.textContent=p.querySelector(".label").textContent;popEl.appendChild(title);
+      if(p.classList.contains("has-children")){
+        const kids=$$('#grp-'+p.dataset.group+" .menu-item__child");
+        kids.forEach(k=>{const it=document.createElement("div");it.className="menu-popover__item"+(k.classList.contains("is-selected")?" is-selected":"");
+          it.textContent=k.textContent;it.onclick=()=>{k.click();closePopover();};popEl.appendChild(it);});
+      }
+      document.body.appendChild(popEl);
+      const r=p.getBoundingClientRect();
+      let top=r.top,left=r.right+8;
+      if(top+popEl.offsetHeight>innerHeight-8)top=innerHeight-8-popEl.offsetHeight;
+      if(left+popEl.offsetWidth>innerWidth-8)left=innerWidth-8-popEl.offsetWidth;
+      popEl.style.top=top+"px";popEl.style.left=left+"px";
+    },120);
+  });
+  p.addEventListener("mouseleave",()=>{popTimer=setTimeout(closePopover,180);});
+});
+/* 用户菜单 */
+$("#userBtn").onclick=e=>{e.stopPropagation();const m=$("#userMenu");m.hidden=!m.hidden;
+  $("#userBtn").setAttribute("aria-expanded",String(!m.hidden));};
+document.addEventListener("click",e=>{if(!$("#userMenu").hidden&&!$("#userMenu").contains(e.target)&&e.target!==$("#userBtn")){$("#userMenu").hidden=true;}});
+
+/* 页签 */
+const PAGE_TITLES={dashboard:"工作台","resource-list":"资源台账","meta-type":"资源类型与属性","tag-list":"标签管理","rule-config":"打标规则配置","match-task":"自动匹配任务","query-center":"标签查询","audit-log":"操作审计"};
+const tabs=[{id:"dashboard"}];let curTab="dashboard";
+function renderTabs(){
+  const box=$("#tabsInner");box.innerHTML="";
+  tabs.forEach(t=>{
+    const el=document.createElement("div");el.className="tab-item"+(t.id===curTab?" is-active":"");
+    el.innerHTML=`<span>${esc(PAGE_TITLES[t.id])}</span>`;
+    if(tabs.length>1){const c=document.createElement("button");c.className="tab-close";c.textContent="✕";c.setAttribute("aria-label","关闭页签");
+      c.onclick=e=>{e.stopPropagation();closeTab(t.id);};el.appendChild(c);}
+    el.onclick=()=>switchTab(t.id);box.appendChild(el);
+  });
+}
+function switchTab(id){
+  if(!tabs.some(t=>t.id===id))tabs.push({id});
+  curTab=id;renderTabs();
+  $$(".page").forEach(p=>p.hidden=p.id!=="page-"+id);
+  $("#pageTitle").textContent=PAGE_TITLES[id];
+  $$(".menu-item__child").forEach(c=>c.classList.toggle("is-selected",c.dataset.page===id));
+  $$(".menu-item__parent").forEach(p=>p.classList.toggle("is-active",p.dataset.page===id||(p.classList.contains("has-children")&&$$('#grp-'+p.dataset.group+" .menu-item__child.is-selected").length>0)));
+  if(id==="dashboard")renderDashTags();
+}
+function closeTab(id){
+  const i=tabs.findIndex(t=>t.id===id);if(i<0)return;
+  tabs.splice(i,1);
+  if(curTab===id)curTab=tabs[Math.max(0,i-1)].id;
+  switchTab(curTab);
+}
+$$("[data-page]").forEach(el=>{
+  el.addEventListener("click",()=>{
+    if(el.classList.contains("menu-item__child")&&window.innerWidth<=991)app.classList.remove("is-mobile-open");
+    switchTab(el.dataset.page);
+    if(el.classList.contains("menu-item__child")&&el.closest(".menu-popover"))closePopover();
+  });
+  el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click();}});
+});
+
+/* ================= 工作台 ================= */
+function renderDashTags(){
+  const box=$("#dashTopTags");if(!box||box.dataset.done)return;
+  const top=[["A级-战略级仓",8,100],["B级-重要级仓",12,100],["保税仓",4,50],["冷链仓",6,75],["集装箱堆场",9,100]];
+  box.innerHTML=top.map(([n,c,p])=>`<div class="bar-row"><span>${esc(n)}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="num">${c} 项</span></div>`).join("");
+  box.dataset.done="1";
+}
+
+/* ================= 资源台账 ================= */
+function tagChipsHTML(tags){
+  if(!tags||!tags.length)return '<span style="color:var(--text-disabled);font-size:12px;">无</span>';
+  return tags.map(([id,name,kind,color])=>`<span class="tag-chip" style="background:${color}14;color:${color};"><i style="background:${color}"></i>${esc(name)}</span>`).join("");
+}
+function renderResources(list){
+  const tb=$("#resTbody");
+  if(!list.length){
+    tb.innerHTML=`<tr><td class="data-table__cell" colspan="10"><div class="empty-state">
+      <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p>没有符合条件的资源——试试放宽筛选条件，或新建资源</p>
+      <button class="btn btn-primary is-plain btn-sm" onclick="switchTab('meta-type')">去配置资源类型</button></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML=list.map(r=>`<tr>
+    <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;">${esc(r.name)}</span><br><span style="font-size:12px;color:var(--text-caption);">${esc(r.id)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(r.type)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(r.wType)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content" style="font-variant-numeric:tabular-nums;">${r.area.toLocaleString()}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(r.own)}</span></td>
+    <td class="data-table__cell"><span class="status-tag ${r.status==="运营中"?"status-tag--success":r.status==="建设中"?"status-tag--warning":"status-tag--gray"}">${esc(r.status)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(r.region)}</span></td>
+    <td class="data-table__cell"><span class="data-table__content">${esc(r.org)}</span></td>
+    <td class="data-table__cell">${tagChipsHTML(r.tags)}</td>
+    <td class="data-table__cell" style="white-space:nowrap;"><button class="link-btn" data-res="${r.id}" data-act="resDetail">详情</button><button class="link-btn" data-res="${r.id}" data-act="resEdit">编辑</button></td>
+  </tr>`).join("");
+}
+function resourceDetail(r){
+  const body=document.createElement("div");
+  const cls=r.tags.filter(t=>t[2]==="c"),grd=r.tags.filter(t=>t[2]==="g");
+  const chip=a=>a.length?a.map(([id,name,k,c])=>`<span class="tag-chip" style="background:${c}14;color:${c};"><i style="background:${c}"></i>${esc(name)}</span>`).join(""):'<span style="color:var(--text-disabled);">暂无</span>';
+  body.innerHTML=`
+    <div class="desc-grid">
+      <div><div class="dt">资源编码</div><div class="dd">${esc(r.id)}</div></div>
+      <div><div class="dt">资源类型</div><div class="dd">${esc(r.type)}</div></div>
+      <div><div class="dt">仓库类型</div><div class="dd">${esc(r.wType)}</div></div>
+      <div><div class="dt">面积</div><div class="dd">${r.area.toLocaleString()} ㎡</div></div>
+      <div><div class="dt">权属</div><div class="dd">${esc(r.own)}</div></div>
+      <div><div class="dt">运营状态</div><div class="dd">${esc(r.status)}</div></div>
+      <div><div class="dt">所属区域</div><div class="dd">${esc(r.region)}</div></div>
+      <div><div class="dt">管理主体</div><div class="dd">${esc(r.org)}</div></div>
+    </div>
+    <div class="section-h">分类标签</div><div>${chip(cls)}</div>
+    <div class="section-h">分级标签 <span style="font-weight:400;">（业务上一个资源通常只有一个战略等级）</span></div><div>${chip(grd)}</div>
+    <div class="section-h">库房层级</div>
+    <div style="font-size:13px;color:var(--text-caption);">${r.type==="仓库"?"下属库房 3 个：1号库（普货区）· 2号库（恒温区）· 3号库（危险品区）":"该资源类型不支持库房层级"}</div>`;
+  openModal({title:"资源详情 — "+r.name,body,lg:true,
+    foot:[{label:"人工贴标",cls:"btn-primary is-plain",onClick:()=>{toast("已打开人工贴标（原型示意）","info");}},
+          {label:"关闭",cls:"btn-primary",onClick:m=>m.remove()}]});
+}
+
+/* ================= 标签管理 ================= */
+function renderTags(){
+  const tb=$("#tagTbody");
+  tb.innerHTML=TAGS.map(t=>{
+    const [txt,cls]=STATUS_MAP[t.status];
+    const canPub=t.status==="DRAFT",canDis=t.status==="EFFECTIVE";
+    const dirty=t.dirty?'<span class="status-tag status-tag--warning" style="height:20px;margin-left:6px;" title="规则已改，关联结果尚未更新">待重算</span>':"";
+    return `<tr>
+      <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;"><span class="color-dot" style="background:${t.color}"></span> ${esc(t.name)}</span></td>
+      <td class="data-table__cell"><span class="status-tag" style="height:22px;">${t.type==="分类"?"分类标签":"分级标签"}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${t.scope.join(" / ")}</span></td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-family:Consolas,monospace;font-size:12px;">${esc(t.rule)}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${esc(t.org)}</span></td>
+      <td class="data-table__cell"><span class="data-table__content">${esc(t.eff)} ~ ${esc(t.exp)}</span></td>
+      <td class="data-table__cell"><span class="status-tag ${cls}">${txt}</span>${dirty}</td>
+      <td class="data-table__cell"><span class="data-table__content" style="font-variant-numeric:tabular-nums;">${t.count}</span></td>
+      <td class="data-table__cell" style="white-space:nowrap;">
+        ${canPub?`<button class="link-btn" data-tag="${t.id}" data-act="tagPublish">发布</button>`:""}
+        <button class="link-btn" data-tag="${t.id}" data-act="tagEdit">编辑</button>
+        <button class="link-btn" data-tag="${t.id}" data-act="tagRule">规则</button>
+        ${canDis?`<button class="link-btn danger" data-tag="${t.id}" data-act="tagDisable">停用</button>`:`<button class="link-btn danger" disabled>停用</button>`}
+      </td></tr>`;
+  }).join("");
+}
+function tagFormModal(t){
+  const isNew=!t;
+  const body=document.createElement("div");
+  body.innerHTML=`
+    <div class="form-grid">
+      <div class="form-item"><label>标签名称 <span class="req">*</span></label><input class="input" id="tfName" value="${t?esc(t.name):""}" placeholder="如：冷链仓"><span class="err">请输入标签名称</span></div>
+      <div class="form-item"><label>标签类型 <span class="req">*</span></label>
+        <div class="radio-line" id="tfType">
+          <label><input type="radio" name="tfType" value="分类" ${!t||t.type==="分类"?"checked":""}> 分类标签</label>
+          <label><input type="radio" name="tfType" value="分级" ${t&&t.type==="分级"?"checked":""}> 分级标签</label>
+        </div><span class="hint">分类=功能属性（冷链仓）；分级=战略价值（A级）</span></div>
+      <div class="form-item form-item--full"><label>作用范围（可多选） <span class="req">*</span></label>
+        <div class="checkbox-group" id="tfScope">
+          ${["仓库","场站","码头","船舶"].map(s=>`<span class="check-chip${t&&t.scope.includes(s)?" is-on":""}" data-v="${s}">${s}</span>`).join("")}
+        </div><span class="err">至少选择一个作用范围</span></div>
+      <div class="form-item"><label>生效日期</label><input class="input" type="date" id="tfEff" value="${t&&t.eff!=="—"?t.eff:""}"></div>
+      <div class="form-item"><label>失效日期</label><input class="input" type="date" id="tfExp" value="${t&&t.exp!=="—"?t.exp:""}"><span class="err" id="tfDateErr">失效日期必须晚于生效日期</span></div>
+      <div class="form-item"><label>发布单位</label><input class="input" value="华中区域公司" disabled><span class="hint">创建单位决定修改权限，界面必须展示</span></div>
+      <div class="form-item"><label>展示色</label>
+        <div class="checkbox-group" id="tfColor">
+          ${["#0F65C1","#009B40","#FF7122","#FF2222"].map((c,i)=>`<span class="check-chip${(t&&t.color===c)||(!t&&i===0)?" is-on":""}" data-v="${c}"><span class="color-dot" style="background:${c}"></span></span>`).join("")}
+        </div></div>
+      <div class="form-item form-item--full"><label>备注</label><input class="input" placeholder="选填"></div>
+    </div>`;
+  body.querySelectorAll("#tfScope .check-chip,#tfColor .check-chip").forEach(ch=>{
+    ch.onclick=()=>ch.classList.toggle("is-on");
+  });
+  openModal({title:isNew?"新建标签":"编辑标签 — "+t.name,body,
+    foot:[{label:"取消"},{label:"保存并判重预检",cls:"btn-primary",onClick:m=>{
+      const name=m.querySelector("#tfName").value.trim();
+      const scope=[...m.querySelectorAll("#tfScope .is-on")].map(c=>c.dataset.v);
+      const eff=m.querySelector("#tfEff").value,exp=m.querySelector("#tfExp").value;
+      let ok=true;
+      m.querySelector("#tfName").closest(".form-item").classList.toggle("has-error",!name);ok&&=!!name;
+      m.querySelector("#tfScope").closest(".form-item").classList.toggle("has-error",!scope.length);ok&&=!!scope.length;
+      const dateBad=eff&&exp&&exp<=eff;
+      m.querySelector("#tfDateErr").closest(".form-item").classList.toggle("has-error",dateBad);ok&&=!dateBad;
+      if(!ok)return;
+      if(isNew){
+        /* 判重演示：与"冷链仓"三元组相同 */
+        if(name==="冷链仓"){confirmDialog({title:"检测到标签重复",danger:true,okLabel:"仍要保存",
+          html:"判重键（标签类型 + 作用范围 + 规范化规则）与已有标签 <b>冷链仓</b> 完全相同（附录 8）。<br>建议更换规则维度或标签类型。",onOk:()=>toast("已保存（演示强制通过）","warning")});return;}
+        const nt={id:"t"+Date.now(),name,type:m.querySelector("#tfType").value||"分类",scope,color:(m.querySelector("#tfColor .is-on")||{dataset:{v:"#0F65C1"}}).dataset.v,org:"华中区域公司",eff:eff||"—",exp:exp||"—",status:"DRAFT",count:0,rule:"（尚未配置规则）",dirty:false};
+        TAGS.unshift(nt);renderTags();syncQuerySel();
+        toast("标签已创建（草稿）· 发布后将触发全量匹配","success");
+      }else{
+        t.type=m.querySelector("#tfType").value;t.scope=scope;t.color=(m.querySelector("#tfColor .is-on")||{dataset:{v:t.color}}).dataset.v;
+        if(eff)t.eff=eff;if(exp)t.exp=exp;
+        renderTags();toast("标签已保存","success");
+      }
+      m.remove();
+    }}]});
+}
+function publishTag(t){
+  confirmDialog({title:"发布标签",okLabel:"确认发布",
+    html:`即将发布 <b style="color:var(--primary);">${esc(t.name)}</b>。<br><br>发布后：<br>1. 标签立即进入「生效中」；<br>2. 系统将<b>自动触发一次全量匹配</b>，扫描作用范围内的 ${t.scope.join("/")}资源并建立关联；<br>3. 该动作记入操作审计。`,
+    onOk:()=>{t.status="EFFECTIVE";
+      if(!/^\d{4}/.test(t.eff)){t.eff="2026-10-15";t.exp="2027-10-14";}
+      renderTags();toast(`发布成功 · 已触发全量匹配（任务 M-20261015-00${4+Math.floor(Math.random()*5)}）`,"success");
+      addAudit("发布标签",t.name,"触发全量匹配");}});
+}
+function disableTag(t){
+  confirmDialog({title:"停用标签",danger:true,okLabel:"确认停用",
+    html:`停用后 <b>${esc(t.name)}</b> 不再参与自动匹配，已建立的历史关联保留，但不再出现在资源的「生效标签」中。<br><span style="color:var(--text-caption);font-size:13px;">与"已失效"的区别仅在于原因（人工 vs 到期）。该动作记入操作审计。</span>`,
+    onOk:()=>{t.status="DISABLED";renderTags();toast("标签已停用","success");addAudit("停用标签",t.name,"历史关联保留");}});
+}
+function tagRuleModal(t){
+  const body=document.createElement("div");
+  body.innerHTML=`
+    <dl class="kv-list">
+      <dt>规则语义</dt><dd style="font-family:Consolas,monospace;">${esc(t.rule)}</dd>
+      <dt>匹配范围</dt><dd>${t.scope.join(" / ")}（作用范围之外的资源永不参与该标签匹配）</dd>
+      <dt>结构约束</dt><dd>一个标签只有一条生效规则（tag_rule.tag_id 唯一约束，ADR-0012）</dd>
+    </dl>
+    <div class="section-h">匹配口径示例</div>
+    <div class="sample-list">
+      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">长沙霞凝冷链物流园</span><span class="why">仓库类型=冷链 ✓ 且 面积 12,300 ≥ 5,000 ✓</span></div>
+      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">岳阳城陵矶普货仓库</span><span class="why">仓库类型=普货 ✗（首条件即失败，短路）</span></div>
+      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">郑州圃田集装箱场站</span><span class="why">不在作用范围（场站 ∉ 仓库）——根本不进入规则比对</span></div>
+    </div>`;
+  openModal({title:"规则详情 — "+t.name,body,foot:[{label:"去编辑规则",cls:"btn-primary",onClick:m=>{m.remove();switchTab("rule-config");$("#ruleTag").value=t.id;loadRuleBuilder();}}]});
+}
+
+/* ================= 规则编辑器 ================= */
+let ruleTree=null,uid=0;
+const nodeMap=new Map(); /* id -> 规则树节点（组或条件） */
+function regNode(n){n.__id=++uid;nodeMap.set(n.__id,n);return n;}
+function defaultRule(){
+  return {logic:"AND",children:[
+    {field:"warehouse_type",op:"EQ",values:["冷链"]},
+    {field:"area",op:"GE",values:["5000"]}
+  ]};
+}
+function loadRuleBuilder(){
+  const t=TAGS.find(x=>x.id===$("#ruleTag").value);
+  ruleTree=defaultRule();
+  renderRuleBuilder();
+  $("#ruleName").value=(t?t.name:"")+"识别";
+}
+function fieldOpts(sel){return FIELDS.map(f=>`<option value="${f.code}" ${f.code===sel?"selected":""}>${f.name}</option>`).join("");}
+function opOpts(field,sel){
+  const f=FIELDS.find(x=>x.code===field);const allowed=f?Object.entries(OPS).filter(([k,o])=>o.types.includes(f.type)):[];
+  return allowed.map(([k,o])=>`<option value="${k}" ${k===sel?"selected":""}>${o.label}（${o.sym}）</option>`).join("");
+}
+function valInput(cond){
+  const f=FIELDS.find(x=>x.code===cond.field);
+  if(f&&f.type==="enum"){
+    if(cond.op==="IN"||cond.op==="CONTAINS"){
+      return `<div class="checkbox-group">${f.opts.map(o=>`<span class="check-chip${cond.values.includes(o)?" is-on":""}" data-v="${esc(o)}">${esc(o)}</span>`).join("")}</div>`;
+    }
+    return `<select class="select val">${f.opts.map(o=>`<option ${cond.values[0]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  }
+  const unit=f&&f.unit?`（${f.unit}）`:"";
+  return `<input class="input val" type="${f&&f.type==="date"?"date":"text"}" value="${esc(cond.values[0]??"")}" placeholder="取值${unit}">`;
+}
+function renderRuleBuilder(){
+  uid=0;nodeMap.clear();
+  const root=$("#ruleBuilder");
+  root.innerHTML=renderGroup(regNode(ruleTree),true);
+  bindRuleBuilder(root);
+  updatePreview();
+}
+function renderGroup(g,isRoot){
+  const rows=g.children.map(c=>{
+    if(c.logic){ /* 嵌套组 */
+      regNode(c);
+      return `<div class="rb-row"><div style="flex:1;min-width:0;">${renderGroup(c,false)}</div>
+        <button class="rb-del" data-del="${c.__id}" aria-label="删除条件组">✕</button></div>`;
+    }
+    regNode(c);
+    return `<div class="rb-row" data-cid="${c.__id}">
+      <div class="rb-cond">
+        <select class="select" data-act="field">${fieldOpts(c.field)}</select>
+        <select class="select" data-act="op">${opOpts(c.field,c.op)}</select>
+        <span data-act="valwrap">${valInput(c)}</span>
+      </div>
+      <button class="rb-del" data-del="${c.__id}" aria-label="删除条件">✕</button>
+    </div>`;
+  }).join("");
+  return `<div class="rb-group" data-gid="${g.__id}">
+    <div class="rb-head">
+      <button class="rb-logic" data-act="logic" data-gid="${g.__id}">${g.logic}</button>
+      <span style="font-size:12px;color:var(--text-caption);">条件组（点击切换 AND / OR）${isRoot?"":" · 嵌套组"}</span>
+    </div>
+    <div class="rb-children">${rows||'<div style="font-size:12px;color:var(--text-disabled);padding:4px 2px;">空条件组——保存将被拒绝（防止"配了规则却不命中任何资源"的静默故障）</div>'}</div>
+    <div class="rb-actions">
+      <button class="btn btn-primary is-plain btn-sm" data-add="cond" data-gid="${g.__id}">＋ 添加条件</button>
+      ${!isRoot?"":`<button class="btn btn-default btn-sm" data-add="group" data-gid="${g.__id}">＋ 嵌套条件组</button>`}
+    </div>
+  </div>`;
+}
+function parentOf(nodeId){
+  /* 在树中查找包含某节点的父组 */
+  let found=null;
+  (function walk(g){g.children.forEach(c=>{if(c.__id===nodeId)found=g;else if(c.logic)walk(c);});})(ruleTree);
+  return found;
+}
+function bindRuleBuilder(root){
+  root.querySelectorAll("[data-act=logic]").forEach(b=>b.onclick=()=>{
+    const g=nodeMap.get(+b.dataset.gid);if(!g)return;
+    g.logic=g.logic==="AND"?"OR":"AND";
+    b.textContent=g.logic;updatePreview();
+  });
+  root.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+    const g=nodeMap.get(+b.dataset.gid);if(!g)return;
+    g.children.push(b.dataset.add==="cond"?{field:"area",op:"GE",values:[""]}:{logic:"AND",children:[{field:"ownership",op:"EQ",values:["自有"]}]});
+    renderRuleBuilder();
+  });
+  root.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const p=parentOf(+b.dataset.del);if(!p)return;
+    p.children=p.children.filter(c=>c.__id!==+b.dataset.del);
+    /* 嵌套组空了则连同删除，避免留空壳 */
+    p.children=p.children.filter(c=>!(c.logic&&!c.children.length));
+    renderRuleBuilder();
+  });
+  root.querySelectorAll(".rb-row[data-cid]").forEach(row=>{
+    const cond=nodeMap.get(+row.dataset.cid);if(!cond)return;
+    row.querySelector("[data-act=field]").onchange=s=>{
+      cond.field=s.value;cond.op="EQ";cond.values=[];
+      row.querySelector("[data-act=op]").innerHTML=opOpts(cond.field,"EQ");
+      row.querySelector("[data-act=valwrap]").innerHTML=valInput(cond);
+      bindVal(row,cond);updatePreview();
+    };
+    row.querySelector("[data-act=op]").onchange=s=>{
+      cond.op=s.value;cond.values=[];
+      row.querySelector("[data-act=valwrap]").innerHTML=valInput(cond);
+      bindVal(row,cond);updatePreview();
+    };
+    bindVal(row,cond);
+  });
+}
+function bindVal(row,cond){
+  const wrap=row.querySelector("[data-act=valwrap]");
+  const sel=wrap.querySelector("select.val");
+  if(sel){sel.onchange=()=>{cond.values=[sel.value];updatePreview();};return;}
+  const chips=wrap.querySelectorAll(".check-chip");
+  if(chips.length){chips.forEach(ch=>ch.onclick=()=>{
+    ch.classList.toggle("is-on");
+    cond.values=[...wrap.querySelectorAll(".is-on")].map(c=>c.dataset.v);
+    updatePreview();
+  });return;}
+  const inp=wrap.querySelector("input.val");
+  if(inp)inp.oninput=()=>{cond.values=[inp.value];updatePreview();};
+}
+function treeToText(g){
+  const parts=g.children.map(c=>c.logic?`(${treeToText(c)})`:conditionText(c));
+  const joiner=g.logic==="AND"?" AND ":" OR ";
+  const s=parts.filter(Boolean).join(joiner);
+  return g.children.length>1&&!g.children.some(c=>c.logic)?s:(g.children.some(c=>c.logic)?"("+s+")":s);
+}
+function conditionText(c){
+  const f=FIELDS.find(x=>x.code===c.field)||{name:c.field};
+  const op=OPS[c.op]||{sym:c.op};
+  const vals=c.values.length?c.values.join("、"):"?";
+  return `${f.name} ${op.sym} ${vals}`;
+}
+function updatePreview(){$("#rulePreview").innerHTML="规则语义预览：<b>"+esc(treeToText(ruleTree)||"（空）")+"</b>";}
+
+/* 规则试跑（不写库） */
+function ruleDryRun(){
+  const t=TAGS.find(x=>x.id===$("#ruleTag").value);
+  const semantic=treeToText(ruleTree);
+  const body=document.createElement("div");
+  body.innerHTML=`
+    <dl class="kv-list" style="margin-bottom:14px;">
+      <dt>试跑标签</dt><dd>${esc(t?t.name:"（未选择）")}</dd>
+      <dt>规则语义</dt><dd style="font-family:Consolas,monospace;">${esc(semantic)}</dd>
+      <dt>执行方式</dt><dd>内存求值（演示）· 不写库 · 扫描作用范围资源 96 个</dd>
+    </dl>
+    <div class="section-h">命中预览（3 / 96）</div>
+    <div class="sample-list">
+      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">长沙霞凝冷链物流园</span><span class="why">冷链 ✓ · 12,300㎡ ≥ 5,000 ✓</span></div>
+      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">武汉阳逻保税仓储中心</span><span class="why">非冷链 ✗，但权属=自有 ✓（OR 分支命中）</span></div>
+      <div class="sample-item"><span class="status-tag status-tag--success">命中</span><span class="name">襄阳樊西智能立体仓</span><span class="why">非冷链 ✗，权属=自有 ✓（OR 分支命中）</span></div>
+      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">岳阳城陵矶普货仓库</span><span class="why">普货 ✗ 且面积 3,200 < 5,000 ✗ 且权属=租赁 ✗</span></div>
+      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">未命中</span><span class="name">宜昌三峡机场附近中转仓</span><span class="why">普货 ✗ · 1,800 < 5,000 ✗ · 合作 ✗</span></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">试跑只读不写库；确认无误后保存规则并「重新匹配」才会更新资源-标签关联。</p>`;
+  openModal({title:"规则试跑结果",body,lg:true,foot:[
+    {label:"继续调整"},
+    {label:"保存规则",cls:"btn-primary",onClick:m=>{m.remove();saveRule(false);}}]});
+}
+function saveRule(fromDry){
+  if(!ruleTree.children.length||(ruleTree.children.length===1&&ruleTree.children[0].logic&&!ruleTree.children[0].children.length)){
+    toast("保存被拒绝：空条件组无法保存（附录 2 校验规则 4）","danger");return;
+  }
+  const t=TAGS.find(x=>x.id===$("#ruleTag").value);
+  const semantic=treeToText(ruleTree);
+  if(t&&t.status==="EFFECTIVE"){
+    t.rule=semantic;t.dirty=true;renderTags();
+    openModal({title:"规则已保存，关联结果尚未更新",body:`
+      <div class="match-callout">
+        ${svg.warn}<div>标签 <b>${esc(t.name)}</b> 处于「生效中」，按约定<b>保存规则不会自动重算</b>关联（避免一次误操作波及全量数据）。<br>当前关联数 ${t.count} 基于旧规则。</div>
+      </div>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-caption);">点击「立即重新匹配」将触发一次全量匹配任务并更新资源-标签关联（记入审计）。</p>`,
+      foot:[{label:"稍后处理"},{label:"立即重新匹配",cls:"btn-primary",onClick:m=>{
+        t.dirty=false;t.count=6;renderTags();m.remove();simulateMatch(t.name);}}]});
+    addAudit("修改规则",t.name,"待重新匹配");
   }else{
-    var e=document.getElementById('login-err');e.style.display='block';
-    setTimeout(function(){e.style.display='none'},2500);
+    if(t){t.rule=semantic;renderTags();}
+    toast("规则已保存（草稿不参与匹配）","success");
   }
 }
-function doLogout(){
-  document.getElementById('app').style.display='none';
-  document.getElementById('page-login').style.display='flex';
+
+/* ================= 匹配任务 ================= */
+function simulateMatch(tagName){
+  const blk=$("#matchRunBlock");blk.hidden=false;
+  const fill=$("#matchProgress");const label=$("#matchRunLabel");
+  let p=0;fill.style.width="0%";
+  const timer=setInterval(()=>{
+    p+=Math.random()*22+8;
+    if(p>=100){p=100;clearInterval(timer);
+      label.textContent="匹配完成：新增关联 +6 · 解除 0 · 耗时 82ms";
+      toast(`全量匹配完成（${tagName}）· 新增关联 +6`,"success");
+      setTimeout(()=>{blk.hidden=true;},1800);
+    }else label.textContent=`扫描作用范围内的资源… ${Math.floor(p)}%`;
+    fill.style.width=p+"%";
+  },260);
 }
-function applyRoleMenu(){
-  var ok=ROLES[curRole].pages;
-  document.querySelectorAll('.nav-item').forEach(function(n){
-    n.style.display=ok.indexOf(n.dataset.page)>=0?'':'none';
-  });
+function matchDetail(){
+  openModal({title:"匹配任务详情 — M-20261015-002",body:`
+    <dl class="kv-list">
+      <dt>触发方式</dt><dd>规则变更（冷链仓）</dd>
+      <dt>执行时间</dt><dd>2026-10-15 09:40:44 · 耗时 76ms</dd>
+      <dt>执行方式</dt><dd>混合执行：本规则含 JSON 扩展字段（仓库类型/面积），整条走<b>内存求值</b>，下推率 0%</dd>
+      <dt>结果</dt><dd>新增关联 +5 · 解除关联 2 · 人工打标保留（人工优先级高于自动，ADR-0010）</dd>
+    </dl>
+    <div class="section-h">样本解释（可解释性）</div>
+    <div class="sample-list">
+      <div class="sample-item"><span class="status-tag status-tag--success">贴标</span><span class="name">长沙霞凝冷链物流园</span><span class="why">满足 (仓库类型=冷链 AND 面积≥5000)</span></div>
+      <div class="sample-item is-miss"><span class="status-tag status-tag--gray">解标</span><span class="name">某 3,200㎡ 冷库</span><span class="why">新规则面积阈值 3,000 → 5,000，不再满足</span></div>
+    </div>`,lg:true,foot:[{label:"关闭",cls:"btn-primary"}]});
 }
 
-/* hash 路由 */
-function switchPage(name){
-  if(ROLES[curRole].pages.indexOf(name)<0){toast('当前角色无权访问该页面（后端同样 403）','err');return}
-  curPage=name;
-  location.hash='#/'+name;
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
-  var pg=document.getElementById('page-'+name); if(pg)pg.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.page===name)});
-  if(name==='schedules')renderSchedules();
-  if(name==='quotes')renderQuotes();
-  if(name==='bookings')renderBookings();
-  if(name==='parties')renderParties();
+/* ================= 查询中心 ================= */
+function syncQuerySel(){
+  const rs=$("#qResSel"),ts=$("#qTagSel");if(!rs||!ts)return;
+  rs.innerHTML=RESOURCES.map(r=>`<option value="${r.id}">${esc(r.name)}（${esc(r.type)}）</option>`).join("");
+  ts.innerHTML=TAGS.filter(t=>t.status!=="DRAFT").map(t=>`<option value="${t.id}">${esc(t.name)}（${esc(t.type)}·${STATUS_MAP[t.status][0]}）</option>`).join("");
 }
-window.addEventListener('hashchange',function(){
-  var h=location.hash.replace('#/','');
-  if(h&&document.getElementById('page-'+h))switchPage(h);
-});
-document.querySelectorAll('.nav-item').forEach(function(n){
-  n.addEventListener('click',function(){switchPage(n.dataset.page)});
-  n.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();switchPage(n.dataset.page)}});
-});
-
-/* 侧边栏折叠（状态入 localStorage） */
-function toggleSidebar(){
-  var s=document.getElementById('sidebar'),m=document.getElementById('main');
-  s.classList.toggle('mini');m.classList.toggle('wide');
-  try{localStorage.setItem('ob_sidebar_mini',s.classList.contains('mini')?'1':'0')}catch(e){}
+function emptyState(html,btn){
+  return `<div class="empty-state">
+    <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <p>${html}</p>${btn||""}</div>`;
 }
-try{if(localStorage.getItem('ob_sidebar_mini')==='1'){document.getElementById('sidebar').classList.add('mini');document.getElementById('main').classList.add('wide')}}catch(e){}
-
-/* ================= 渲染 ================= */
-function fmt(n){return n.toLocaleString('zh-CN')}
-function statusTag(s){
-  var m={'DRAFT':['草稿','tag-gray'],'SENT':['已报出','tag-blue'],'ACCEPTED':['已接受','tag-green'],'LOST':['已落空','tag-red'],
-         'SUBMITTED':['已提交','tag-orange'],'CONFIRMED':['已确认','tag-green'],'CANCELLED':['已撤销','tag-red']};
-  return '<span class="tag '+m[s][1]+'">'+m[s][0]+'</span>';
-}
-function renderSchedules(){
-  var o=(document.getElementById('f-origin').value||'').toUpperCase();
-  var d=(document.getElementById('f-dest').value||'').toUpperCase();
-  var e1=document.getElementById('f-etd1').value,e2=document.getElementById('f-etd2').value;
-  var html='';
-  schedules.forEach(function(s){
-    if(o&&s.route.indexOf(o)<0)return;
-    if(d&&s.route.indexOf(d)<0)return;
-    if(e1&&s.etd<e1)return; if(e2&&s.etd>e2)return;
-    s.rows.forEach(function(r,i){
-      html+='<tr>'+
-        (i===0?'<td rowspan="'+s.rows.length+'">'+s.carrier+'</td><td rowspan="'+s.rows.length+'">'+s.vessel+' / '+s.voy+'</td><td rowspan="'+s.rows.length+'">'+s.route+'</td><td rowspan="'+s.rows.length+'" class="num">'+s.etd+'</td><td rowspan="'+s.rows.length+'" class="num">'+s.eta+'</td>':'')+
-        '<td><span class="tag tag-gray">'+r.type+'</span></td>'+
-        '<td class="num">'+r.total+' / <b style="color:'+(r.total-r.booked>0?'var(--success)':'var(--danger)')+'">'+(r.total-r.booked)+'</b></td>'+
-        '<td class="num">'+fmt(r.cost)+'</td><td class="num">'+fmt(r.sell)+'</td>'+
-        '<td>'+(i===0?'<button class="link-btn" onclick="openModal(\'modal-schedetail\')">详情</button> <button class="link-btn" onclick="openQuoteNew()">报价</button>':'')+'</td></tr>';
-    });
-  });
-  document.getElementById('tb-schedules').innerHTML=html||'<tr><td colspan="10" style="text-align:center;color:var(--text-3)">无匹配船期</td></tr>';
-}
-function renderQuotes(){
-  var st=document.getElementById('f-qstatus').value.split(' ')[0];
-  var html='';
-  quotes.forEach(function(q){
-    if(st&&q.status!==st)return;
-    var lines=q.lines.map(function(l){return l.type+'×'+l.qty+' @'+fmt(l.price)}).join('；');
-    var ops='';
-    if(q.status==='DRAFT')ops='<button class="link-btn" onclick="openQuote(\''+q.no+'\')">编辑</button> <button class="link-btn" onclick="toast(\'已报出，之后不可再改（BR-QUOTE-05）\')">发出</button>';
-    else if(q.status==='SENT')ops='<button class="link-btn" onclick="toast(\'客户接受，状态 → ACCEPTED\');qSet(\''+q.no+'\',\'ACCEPTED\')">接受</button> <button class="link-btn danger" onclick="toast(\'已落空，状态 → LOST\');qSet(\''+q.no+'\',\'LOST\')">落空</button>';
-    else if(q.status==='ACCEPTED')ops='<button class="link-btn" onclick="createBooking()">生成订舱单</button>';
-    html+='<tr><td class="num">'+q.no+'</td><td>'+q.cust+'</td><td style="max-width:280px">'+q.sched+'</td><td>'+lines+'</td><td class="num">'+fmt(q.total)+'</td><td>'+statusTag(q.status)+'</td><td>'+q.by+'</td><td>'+ops+'</td></tr>';
-  });
-  document.getElementById('tb-quotes').innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:var(--text-3)">无报价</td></tr>';
-}
-function qSet(no,st){quotes.forEach(function(q){if(q.no===no)q.status=st});renderQuotes()}
-function renderBookings(){
-  var st=document.getElementById('f-bstatus').value.split(' ')[0];
-  var html='';
-  bookings.forEach(function(b){
-    if(st&&b.status!==st)return;
-    html+='<tr><td class="num">'+b.no+'</td><td>'+b.cust+'</td><td style="max-width:240px">'+b.sched+'</td><td>'+b.lines+'</td><td>'+statusTag(b.status)+'</td><td class="num">'+b.so+'</td><td class="num" style="font-size:12px">'+b.cutoff+'</td><td>'+b.by+'</td>'+
-      '<td><button class="link-btn" onclick="openModal(\'modal-booking\')">详情</button>'+(b.status==='DRAFT'?' <button class="link-btn" onclick="toast(\'提交：整单原子扣舱；余量不足整单拒绝（BR-SPACE-02）\')">提交</button>':'')+'</td></tr>';
-  });
-  document.getElementById('tb-bookings').innerHTML=html||'<tr><td colspan="9" style="text-align:center;color:var(--text-3)">无订舱单</td></tr>';
-}
-function renderParties(){
-  var k=(document.getElementById('f-pkey').value||'').trim();
-  var idx=0,html='';
-  for(var g in parties){
-    var rows=parties[g].filter(function(r){return !k||r.name.indexOf(k)>=0||r.contact.indexOf(k)>=0||r.phone.indexOf(k)>=0});
-    if(!rows.length)continue;
-    var body=rows.map(function(r){
-      return '<tr><td>'+r.name+'</td><td>'+r.addr+'</td><td>'+r.contact+'</td><td class="num">'+r.phone+'</td><td>'+r.email+'</td>'+
-        '<td><button class="link-btn" onclick="openModal(\'modal-party\')">编辑</button> <button class="link-btn danger" onclick="toast(\'删除被引用即拒绝，并报出订舱单号（BR-PARTY-02）\',\'err\')">删除</button></td></tr>';
-    }).join('');
-    html+='<div class="acc-item'+(idx===0?' open':'')+'">'+
-      '<div class="acc-head" role="button" tabindex="0" aria-expanded="'+(idx===0)+'" onclick="accToggle(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();accToggle(this)}">'+
-      '<span class="arrow">▶</span><span class="name">'+g+'</span><span class="count">('+rows.length+')</span></div>'+
-      '<div class="acc-body"><table><thead><tr><th>名称</th><th>地址</th><th>联系人</th><th>电话</th><th>邮箱</th><th>操作</th></tr></thead><tbody>'+body+'</tbody></table></div></div>';
-    idx++;
+function queryByRes(){
+  const r=RESOURCES.find(x=>x.id===$("#qResSel").value);
+  const box=$("#qResResult");
+  if(!r){box.innerHTML=emptyState("请选择资源");return;}
+  if(!r.tags.length){
+    box.innerHTML=emptyState(`「${esc(r.name)}」当前没有任何生效标签<br><span style="font-size:12px;">可能原因：未落在任何标签作用范围 / 规则未命中 / 标签已失效</span>`,
+      `<button class="btn btn-primary is-plain btn-sm" onclick="switchTab('rule-config')">查看打标规则</button>`);
+    return;
   }
-  document.getElementById('acc-parties').innerHTML=html||'<p style="padding:12px;color:var(--text-3)">无匹配档案</p>';
+  const cls=r.tags.filter(t=>t[2]==="c"),grd=r.tags.filter(t=>t[2]==="g");
+  const chip=a=>a.map(([id,name,k,c])=>`<span class="tag-chip" style="background:${c}14;color:${c};"><i style="background:${c}"></i>${esc(name)}</span>`).join("");
+  box.innerHTML=`<div class="block" style="box-shadow:none;border:1px solid var(--border-light);">
+    <div class="desc-grid" style="margin-bottom:14px;">
+      <div><div class="dt">资源</div><div class="dd">${esc(r.name)}（${esc(r.id)}）</div></div>
+      <div><div class="dt">类型 / 仓库类型</div><div class="dd">${esc(r.type)} / ${esc(r.wType)}</div></div>
+      <div><div class="dt">面积</div><div class="dd">${r.area.toLocaleString()} ㎡</div></div>
+      <div><div class="dt">权属</div><div class="dd">${esc(r.own)}</div></div>
+    </div>
+    <div class="section-h">分类标签（${cls.length}）</div><div>${chip(cls)}</div>
+    <div class="section-h">分级标签（${grd.length}）</div><div>${chip(grd)}</div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:10px;">已失效标签的历史关联不在此展示；人工贴标以「人工」角标呈现且优先级高于自动匹配。</p>
+  </div>`;
 }
-function accToggle(head){
-  var item=head.parentElement,open=item.classList.contains('open');
-  /* 同级互斥 */
-  item.parentElement.querySelectorAll('.acc-item').forEach(function(i){i.classList.remove('open');var h=i.querySelector('.acc-head');if(h)h.setAttribute('aria-expanded','false')});
-  if(!open){item.classList.add('open');head.setAttribute('aria-expanded','true')}
+function queryByTag(){
+  const t=TAGS.find(x=>x.id===$("#qTagSel").value);
+  const box=$("#qTagResult");const onlyActive=$("#qTagActive").value==="1";
+  if(!t){box.innerHTML=emptyState("请选择标签");return;}
+  if(t.status==="DRAFT"){box.innerHTML=emptyState("草稿标签未生效，不参与匹配，因此没有关联资源");return;}
+  if(t.status==="EXPIRED"&&onlyActive){box.innerHTML=emptyState(`「${esc(t.name)}」已失效，切换为「含历史关联」可查看到期前的关联`);return;}
+  if(t.status==="DISABLED"&&onlyActive){box.innerHTML=emptyState(`「${esc(t.name)}」已停用`);return;}
+  const list=RESOURCES.filter(r=>r.tags.some(x=>x[0]===t.id));
+  if(!list.length){box.innerHTML=emptyState("该标签暂无关联资源——可触发一次全量匹配");return;}
+  box.innerHTML=`<div class="block" style="box-shadow:none;border:1px solid var(--border-light);">
+    <div class="table-scroll"><table class="data-table" style="min-width:760px;">
+      <thead><tr><th class="data-table__cell">资源名称</th><th class="data-table__cell">类型</th><th class="data-table__cell">面积（㎡）</th><th class="data-table__cell">权属</th><th class="data-table__cell">运营状态</th><th class="data-table__cell">关联来源</th><th class="data-table__cell">操作</th></tr></thead>
+      <tbody>${list.map(r=>`<tr>
+        <td class="data-table__cell"><span class="data-table__content" style="font-weight:500;">${esc(r.name)}</span></td>
+        <td class="data-table__cell"><span class="data-table__content">${esc(r.type)}</span></td>
+        <td class="data-table__cell"><span class="data-table__content">${r.area.toLocaleString()}</span></td>
+        <td class="data-table__cell"><span class="data-table__content">${esc(r.own)}</span></td>
+        <td class="data-table__cell"><span class="data-table__content">${esc(r.status)}</span></td>
+        <td class="data-table__cell"><span class="status-tag" style="height:22px;">自动匹配</span></td>
+        <td class="data-table__cell"><button class="link-btn" data-res="${r.id}" data-act="resDetail">详情</button></td>
+      </tr>`).join("")}</tbody></table></div>
+    <div class="table-footer"><span>共 ${list.length} 条</span></div></div>`;
 }
 
-/* ================= 报价弹窗 ================= */
-function openQuoteNew(){
-  document.getElementById('quote-modal-title').textContent='新建报价';
-  document.getElementById('quote-modal-body').innerHTML=
-   '<div class="form-grid">'+
-   '<div class="form-item"><label>客户<span class="req">*</span></label><select><option>环球贸易有限公司</option></select></div>'+
-   '<div class="form-item"><label>船期<span class="req">*</span></label><select><option>COSCO SHIPPING STAR / 008W · QINGDAO→HAMBURG · ETD 2026-10-15</option><option>COSCO SHIPPING GEMINI / 012E</option><option>OOCL GERMANY / 045W</option><option>COSCO SHIPPING ARIES / 021W</option></select></div>'+
-   '</div>'+
-   '<div class="sub-title">箱型行 <span class="tag tag-gray">可多行 · 每行价不得低于成本价</span></div>'+
-   '<table><thead><tr><th>箱型</th><th style="width:110px">数量</th><th style="width:140px">销售价(USD)</th></tr></thead><tbody>'+
-   '<tr><td><select style="height:28px"><option>40HQ（成本 1800）</option></select></td><td><input type="number" value="1" min="1" style="height:28px;width:100%"></td><td><input type="number" value="2200" step="0.01" style="height:28px;width:100%"></td></tr>'+
-   '</tbody></table>'+
-   '<p style="font-size:12px;color:var(--text-3);margin-top:8px">报价不占舱位（ADR-0001）；提交时被扣的舱在此之后才发生。</p>';
-  document.getElementById('quote-modal-foot').innerHTML=
-   '<button class="btn" onclick="closeModal(\'modal-quote\')">取消</button>'+
-   '<button class="btn btn-primary" onclick="closeModal(\'modal-quote\');toast(\'报价草稿已创建，单号 Q+yyyyMMdd+3位流水（BR-QUOTE-01）\')">保存草稿</button>';
-  openModal('modal-quote');
+/* ================= 审计 ================= */
+function addAudit(action,obj,note){
+  /* 原型演示：审计写入以 toast 提示代替 */
 }
-function openQuote(no){
-  var q=quotes.filter(function(x){return x.no===no})[0];
-  document.getElementById('quote-modal-title').textContent='编辑报价 '+q.no;
-  document.getElementById('quote-modal-body').innerHTML=
-   '<dl class="desc"><dt>客户</dt><dd>'+q.cust+'</dd><dt>状态</dt><dd>'+statusTag(q.status)+'</dd>'+
-   '<dt>船期</dt><dd colspan="3" style="grid-column:span 3">'+q.sched+'</dd></dl>'+
-   '<div class="sub-title">箱型行</div>'+
-   '<table><thead><tr><th>箱型</th><th>数量</th><th>销售价(USD)</th><th>小计</th></tr></thead><tbody>'+
-   q.lines.map(function(l){return '<tr><td>'+l.type+'</td><td class="num">'+l.qty+'</td><td class="num"><input type="number" value="'+l.price+'" step="0.01" style="height:28px;width:120px"></td><td class="num">'+fmt(l.price*l.qty)+'</td></tr>'}).join('')+
-   '</tbody></table>'+
-   '<p style="font-size:12px;color:var(--text-3);margin-top:8px">试一试：把 2200 改成 1700 保存 → 后端拒绝（低于成本价 1800，40001），并在操作日志留下痕迹。</p>';
-  document.getElementById('quote-modal-foot').innerHTML=
-   '<button class="btn" onclick="closeModal(\'modal-quote\')">取消</button>'+
-   '<button class="btn btn-primary" onclick="closeModal(\'modal-quote\');toast(\'草稿已保存\')">保存</button>';
-  openModal('modal-quote');
-}
-function createBooking(){
-  closeModal('modal-quote');
-  switchPage('bookings');
-  openModal('modal-booking');
-  toast('已从 Q20261013001 生成订舱单草稿，箱型行自动继承 40HQ×1（BR-BOOK-03）');
-}
-function openCancel(){openModal('modal-cancel')}
 
-/* ================= 弹窗 & 提示 ================= */
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-document.querySelectorAll('.modal-mask').forEach(function(m){
-  m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open')});
+/* ================= 事件委托 ================= */
+document.addEventListener("click",e=>{
+  const act=e.target.closest("[data-act]");if(!act)return;
+  const a=act.dataset.act;
+  if(a==="resSearch"){
+    const kw=$("#resKw").value.trim(),ty=$("#resType").value;
+    const list=RESOURCES.filter(r=>(!kw||r.name.includes(kw)||r.id.includes(kw))&&(!ty||r.type===ty));
+    renderResources(list);
+    toast(`查询完成 · 命中 ${list.length} 条`,"info");
+  }
+  else if(a==="resReset"){$("#resKw").value="";$("#resType").value="";renderResources(RESOURCES);}
+  else if(a==="resNew")openModal({title:"新建资源",body:resForm(),foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{
+    const name=m.querySelector("#rfName").value.trim();
+    m.querySelector("#rfName").closest(".form-item").classList.toggle("has-error",!name);
+    if(!name)return;
+    RESOURCES.unshift({id:"R00"+(RESOURCES.length+9),name,type:m.querySelector("#rfType").value,wType:m.querySelector("#rfWType").value,area:+m.querySelector("#rfArea").value||0,own:m.querySelector("#rfOwn").value,status:m.querySelector("#rfStatus").value,region:"湖北 · 武汉",org:"华中区域公司",tags:[]});
+    renderResources(RESOURCES);m.remove();toast("资源已创建 · 数据范围校验通过（本单位及下级）","success");
+  }}]});
+  else if(a==="resImport")confirmDialog({title:"批量导入",okLabel:"开始校验",
+    html:"上传 Excel 后<b>逐行校验数据范围与必填属性</b>：任一行越权或缺失必填项，整批回滚并逐行报错（附录 3）。<br><br>原型示意：选择文件后开始校验。",onOk:()=>toast("校验完成：24 行全部通过，已导入","success")});
+  else if(a==="resDetail"){const r=RESOURCES.find(x=>x.id===act.dataset.res)||RESOURCES.find(x=>x.id===act.getAttribute("data-res"));r&&resourceDetail(r);}
+  else if(a==="resEdit")toast("编辑资源（原型示意）","info");
+  else if(a==="tagSearch")toast("查询完成 · 命中 9 条","info");
+  else if(a==="tagNew")tagFormModal(null);
+  else if(a==="tagPublish"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&publishTag(t);}
+  else if(a==="tagDisable"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&disableTag(t);}
+  else if(a==="tagEdit"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&tagFormModal(t);}
+  else if(a==="tagRule"){const t=TAGS.find(x=>x.id===act.dataset.tag);t&&tagRuleModal(t);}
+  else if(a==="attrNew")openModal({title:"新增资源属性",body:`
+    <div class="form-grid">
+      <div class="form-item"><label>属性编码 <span class="req">*</span></label><input class="input" placeholder="如 temperature_zone"></div>
+      <div class="form-item"><label>属性名称 <span class="req">*</span></label><input class="input" placeholder="如 温区"></div>
+      <div class="form-item"><label>数据类型</label><select class="select"><option>枚举</option><option>数值</option><option>文本</option><option>日期</option><option>布尔</option></select></div>
+      <div class="form-item"><label>单位</label><input class="input" placeholder="选填"></div>
+      <div class="form-item form-item--full"><label>可选值（枚举类型，逗号分隔）</label><input class="input" placeholder="冷藏, 冷冻, 恒温"></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">新增属性走元数据表，<b>零 DDL</b>；存储于扩展 JSON，高频使用后可升级为表达式索引（ADR-0014）。</p>`,
+    foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{m.remove();toast("属性已创建，资源录入页即刻可用","success");}}]});
+  else if(a==="attrManage")toast("已定位到「仓库」类型属性清单（下方列表）","info");
+  else if(a==="typeNew")openModal({title:"新建资源类型",body:`
+    <div class="form-grid">
+      <div class="form-item"><label>类型编码 <span class="req">*</span></label><input class="input" placeholder="如 RAIL_SIDING"></div>
+      <div class="form-item"><label>类型名称 <span class="req">*</span></label><input class="input" placeholder="如 铁路货场"></div>
+      <div class="form-item form-item--full"><label>图标</label><input class="input" value="🚂" style="width:80px;text-align:center;"></div>
+    </div>`,foot:[{label:"取消"},{label:"保存",cls:"btn-primary",onClick:m=>{m.remove();toast("资源类型已创建，可继续配置属性清单","success");}}]});
+  else if(a==="ruleSave")saveRule(false);
+  else if(a==="ruleDry")ruleDryRun();
+  else if(a==="ruleEmpty"){ruleTree={logic:"AND",children:[]};renderRuleBuilder();
+    setTimeout(()=>{toast("空条件组校验：保存被拒绝（见预览区提示）","danger");ruleTree=defaultRule();renderRuleBuilder();},900);}
+  else if(a==="aiTransfer"||a==="aiDry"){
+    const txt=$("#aiText").value.trim();
+    if(!txt){toast("请输入自然语言描述","warning");return;}
+    const parsed={logic:"OR",children:[
+      {logic:"AND",children:[{field:"warehouse_type",op:"EQ",values:["冷链"]},{field:"area",op:"GE",values:["5000"]}]},
+      {field:"ownership",op:"EQ",values:["自有"]}
+    ]};
+    if(a==="aiTransfer"){ruleTree=parsed;renderRuleBuilder();toast("AI 已将描述转成条件树，可在下方微调后保存","success");}
+    else openModal({title:"AI 解析预览（不写入编辑器）",body:`
+      <dl class="kv-list"><dt>输入</dt><dd>${esc(txt)}</dd>
+      <dt>条件树</dt><dd style="font-family:Consolas,monospace;">(仓库类型 = 冷链 AND 面积 ≥ 5000) OR 权属 = 自有</dd>
+      <dt>置信度</dt><dd><span class="status-tag status-tag--success">高 · 字段全部命中属性字典</span></dd></dl>`,
+      foot:[{label:"取消"},{label:"应用到编辑器",cls:"btn-primary",onClick:()=>{ruleTree=parsed;renderRuleBuilder();toast("已应用到编辑器","success");}}]});
+  }
+  else if(a==="matchRun")simulateMatch("全部生效标签");
+  else if(a==="matchDetail")matchDetail();
+  else if(a==="matchFail")openModal({title:"失败原因 — M-20261014-007",body:`
+    <div class="match-callout">${svg.err}<div>规则引用属性 <b>吞吐能力</b> 已被删除，导致规则校验失败。<br>处理建议：恢复该属性，或修改规则引用其他属性后重新匹配。</div></div>`,
+    foot:[{label:"关闭"},{label:"去修改规则",cls:"btn-primary",onClick:m=>{m.remove();switchTab("rule-config");}}]});
+  else if(a==="qResGo")queryByRes();
+  else if(a==="qTagGo")queryByTag();
 });
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape')document.querySelectorAll('.modal-mask.open').forEach(function(m){m.classList.remove('open')});
+/* 查询中心页内切换 */
+$$("[data-qtab]").forEach(ch=>ch.onclick=()=>{
+  $$("[data-qtab]").forEach(c=>{c.classList.remove("is-on");c.setAttribute("aria-selected","false");});
+  ch.classList.add("is-on");ch.setAttribute("aria-selected","true");
+  $("#qtab-byRes").hidden=ch.dataset.qtab!=="byRes";
+  $("#qtab-byTag").hidden=ch.dataset.qtab!=="byTag";
 });
-var toastTimer=null;
-function toast(msg,type){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast '+(type||'');t.style.display='block';
-  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.style.display='none'},3000);
+/* 规则标签切换 */
+$("#ruleTag").onchange=loadRuleBuilder;
+/* AI 示例 chip */
+$$(".ai-chip[data-ai]").forEach(c=>c.onclick=()=>{$("#aiText").value=c.dataset.ai;});
+
+/* 资源新建表单 */
+function resForm(){
+  return `<div class="form-grid">
+    <div class="form-item"><label>资源名称 <span class="req">*</span></label><input class="input" id="rfName" placeholder="如：黄石棋盘洲中转仓"><span class="err">请输入资源名称</span></div>
+    <div class="form-item"><label>资源类型 <span class="req">*</span></label><select class="select" id="rfType"><option>仓库</option><option>场站</option><option>码头</option><option>船舶</option></select></div>
+    <div class="form-item"><label>仓库类型</label><select class="select" id="rfWType"><option>普货</option><option>冷链</option><option>危化品</option><option>保税</option><option>智能</option></select></div>
+    <div class="form-item"><label>面积（㎡）</label><input class="input" id="rfArea" type="number" placeholder="如 5000"></div>
+    <div class="form-item"><label>权属</label><select class="select" id="rfOwn"><option>自有</option><option>租赁</option><option>合作</option></select></div>
+    <div class="form-item"><label>运营状态</label><select class="select" id="rfStatus"><option>运营中</option><option>建设中</option><option>停用</option></select></div>
+    <div class="form-item"><label>所属区域</label><select class="select"><option>湖北 · 武汉</option><option>湖南 · 长沙</option><option>河南 · 郑州</option></select></div>
+    <div class="form-item"><label>管理主体</label><input class="input" value="华中区域公司" disabled><span class="hint">默认当前数据范围单位</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--text-caption);margin-top:12px;">※ 数据权限：只能录入本单位及下级单位的资源，越权录入将被拒绝（附录 3）。</p>`;
 }
+
+/* ================= 初始化 ================= */
+renderResources(RESOURCES);
+renderTags();
+renderDashTags();
+syncQuerySel();
+loadRuleBuilder();
+switchTab("dashboard");
+renderTabs();
 </script>
 </body>
 </html>
