@@ -1,0 +1,1 @@
+import{s as n}from"./index-B4BvErRS.js";const t=n({current:null});function a(e){return new Promise(r=>{t.current={title:e.title??"确认操作",html:e.html,okLabel:e.okLabel??"确认",cancelLabel:e.cancelLabel??"取消",danger:e.danger??!1,resolve:r}})}function c(){return t}function u(e){const r=t.current;t.current=null,r==null||r.resolve(e)}export{a as c,u as s,c as u};

@@ -1,0 +1,1 @@
+import{s as o}from"./index-B4BvErRS.js";const e=o([]);let u=0;function d(i,s="info",t){const n=++u;e.push(t?{id:n,msg:i,type:s,action:t}:{id:n,msg:i,type:s}),setTimeout(()=>f(n),t?5200:3e3)}function f(i){const s=e.findIndex(t=>t.id===i);s>=0&&e.splice(s,1)}function r(){return e}export{f as d,d as t,r as u};
